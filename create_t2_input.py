@@ -1,3 +1,4 @@
+#Author - Evan Leister
 import sys
 import string
 from time import clock

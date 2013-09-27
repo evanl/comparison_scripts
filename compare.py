@@ -1,3 +1,4 @@
+#Author - Evan Leister
 import tough.t2.process_t2_output as pt2
 import vesa.VESA_02_01_13.vesa_output_read as pv
 from time import time, clock

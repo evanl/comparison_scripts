@@ -1,3 +1,4 @@
+#Author - Evan Leister
 import vesa_writing_functions as wf
 import read_eclipse as re
 import eclipse_cells as ec

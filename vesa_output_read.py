@@ -1,4 +1,4 @@
-# This script reads VESA output files 
+#Author - Evan Leister
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

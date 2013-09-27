@@ -1,3 +1,4 @@
+#Author - Evan Leister
 import eclipse_cells as ec
 
 class Injector(object):

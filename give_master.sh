@@ -6,3 +6,5 @@ rsync -t *eclipse* $parentdir/tough/t2/
 
 rsync -t vesa* $parentdir/vesa/VESA_02_01_13/ 
 rsync -t *eclipse* $parentdir/vesa/VESA_02_01_13/
+
+rsync -t compare.py $parentdir/
