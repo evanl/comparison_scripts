@@ -203,6 +203,30 @@ class T2Timestep(object):
         # these two parameters are obtained from reading CO2TAB
         self.co2_viscosity = {}
         self.co2_density = {}
+    
+    def get_plot_value(self, element, valtype):
+        if valtype == 'saturation':
+            v = self.sat_gas[element]
+        elif valtype == 'pressure':
+            v = self.pressure[element]
+        elif valtype == 'delta_p':
+            v = self.pres_diff[element]
+        elif valtype == 'temperature':
+            v = self.temperature[element]
+        elif valtype == 'internal_density':
+            v = self.rho_gas[element]
+        elif valtype == 'external_density':
+            v = self.co2_viscosity[element]
+        elif valtype == 'viscosity':
+            v = self.co2_viscosity[element]
+        else:
+            print "please specify a valid element type: \n"
+            print "saturation, pressure, delta_p, temperature"
+            print "internal_density, external_density, viscosity"
+            return 1
+        return v
+
+
 
     def readOutput(self, fopen, grid):
         """
@@ -365,15 +389,7 @@ class T2Timestep(object):
                 for el in self.elements:
                     if x == grid.x[el]:
                         if grid.j[el] == index:
-                            if valtype == 'saturation':
-                                v = self.sat_gas[el]
-                            elif valtype == 'pressure':
-                                v = self.pressure[el]
-                            elif valtype == 'delta_p':
-                                v = self.pres_diff[el]
-                            else: 
-                                print "Please specify a correct valtype key"
-                                return 1
+                            v = self.get_plot_value(el, valtype)
                             tempvals.append(\
                                     (grid.x[el], grid.z[el], v))
                 tempvals = sorted(tempvals, key = itemgetter(1))
@@ -384,15 +400,7 @@ class T2Timestep(object):
                 for el in self.elements:
                     if y == grid.y[el]:
                         if grid.i[el] == index:
-                            if valtype == 'saturation':
-                                v = self.sat_gas[el]
-                            elif valtype == 'pressure':
-                                v = self.pressure[el]
-                            elif valtype == 'delta_p':
-                                v = self.pres_diff[el]
-                            else: 
-                                print "Please specify a correct valtype key"
-                                return 1
+                            v = self.get_plot_value(el, valtype)
                             tempvals.append(\
                                     (grid.y[el], grid.z[el], v))
                 tempvals = sorted(tempvals, key = itemgetter(1))
@@ -403,15 +411,7 @@ class T2Timestep(object):
                 for el in self.elements:
                     if x == grid.x[el]:
                         if grid.k[el] == index:
-                            if valtype == 'saturation':
-                                v = self.sat_gas[el]
-                            elif valtype == 'pressure':
-                                v = self.pressure[el]
-                            elif valtype == 'delta_p':
-                                v = self.pres_diff[el]
-                            else: 
-                                print "Please specify a correct valtype key"
-                                return 1
+                            v = self.get_plot_value(el, valtype)
                             tempvals.append(\
                                 (grid.x[el], grid.y[el], v))
                 tempvals = sorted(tempvals,key=itemgetter(1))
@@ -461,9 +461,6 @@ class T2Timestep(object):
                     xpl[i][j] = float(self.plot_grid[i][j][0])
                     ypl[i][j] = float(self.plot_grid[i][j][1])
                     val[i][j] = float(self.plot_grid[i][j][2])
-                    if i == 0:
-                        if j == 0:
-                            print '\n'
         else: 
             print "run T2grid.makeGrid() before using this function"
             return 1
