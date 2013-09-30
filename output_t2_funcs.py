@@ -226,8 +226,6 @@ class T2Timestep(object):
             return 1
         return v
 
-
-
     def readOutput(self, fopen, grid):
         """
         reads through the already opened t2run.out file until it finds the 
@@ -422,13 +420,8 @@ class T2Timestep(object):
         self.plot_grid = vals
         return 0
 
-    def plot_planar_timestep(self, grid, axis, index, valtype, \
-            name = 'test',fmt='png', sleipner = True, \
-            section = False):
-        valstr = "Valtype = " + str(valtype) + '\n'
-        axstr = "Axis =  " + str(axis) + '\n'
-        indstr = "Index = " + str(index) 
-        print "Plotting Planar Timestep: " + '\n' + valstr + axstr + indstr
+    def format_plot_grid(self, grid, axis, sleipner, section):
+        """ spits out 3 numpy arrays"""
         if axis == 1:
             nxp = len(grid.x_vals)
             if sleipner == True:
@@ -462,17 +455,27 @@ class T2Timestep(object):
                     ypl[i][j] = float(self.plot_grid[i][j][1])
                     val[i][j] = float(self.plot_grid[i][j][2])
         else: 
-            print "run T2grid.makeGrid() before using this function"
+            print "run T2grid.make_plot_grid() before using this function"
             return 1
+        return xpl, ypl, val
+
+    def plot_planar_timestep(self, grid, axis, index, valtype, \
+            name = 'test',fmt='png', sleipner = True, \
+            section = False):
+        valstr = "Valtype = " + str(valtype) + '\n'
+        axstr = "Axis =  " + str(axis) + '\n'
+        indstr = "Index = " + str(index) 
+        print "Plotting Planar Timestep: " + '\n' + valstr + axstr + indstr
+        xpl, ypl, val = self.format_plot_grid(grid, axis, sleipner, section)
         f = plt.figure(num=None, dpi=480, facecolor= 'w',\
                 #figsize=(7.5,10), 
             edgecolor ='k')
         ax = f.add_subplot(111)
         if sleipner == True:
-            title_time = '{:.0f}.'.format(self.step_time/ 365.25 + 1998)
-            title_time = '{:.0f} days.'.format(self.step_time)
+            title_time = '{:.0f}'.format(self.step_time/ 365.25 + 1998)
+            title_time = '{:.0f} days'.format(self.step_time)
         else:
-            title_time = '{:.0f} days.'.format(self.step_time)
+            title_time = '{:.0f} days'.format(self.step_time)
         title_time = title_time.zfill(2)
 
         Nlevels = 21
@@ -481,20 +484,23 @@ class T2Timestep(object):
             CB = plt.colorbar(CS, shrink = 0.8, extend = 'both')
             CB.set_label("Pressure [Pa]")
             f.suptitle("T2slice, simulation: "+ name + ": + " + \
-                    "\n Pressure in  " + title_time  )
+                    "\n Pressure in  " + title_time + \
+                    axstr + indstr)
         elif valtype == 'saturation':
             V = np.linspace(0.,0.8,num=Nlevels)
             CS = ax.contourf(xpl,ypl,val,V) 
             CB = plt.colorbar(CS, shrink = 0.8, extend = 'both', ticks =V )
             CB.set_label("Saturation []")
             f.suptitle("T2slice, simulation: "+ name + ": + " + \
-                    "\n Saturation in  " + title_time )
+                    "\n Saturation in  " + title_time +\
+                    axstr + indstr)
         elif valtype == 'delta_p':
             CS = ax.contourf(xpl,ypl,val) 
             CB = plt.colorbar(CS, shrink = 0.8, extend = 'both')
             CB.set_label("Pressure Difference P - Po [Pa]")
             f.suptitle("T2slice, simulation: "+ name + ": + " + \
-                    "\n Pressure Difference in  " + title_time )
+                    "\n Pressure Difference in  " + title_time+\
+                    axstr + indstr)
         else: 
             print "pressure or saturation ? "
             return 1
@@ -522,9 +528,7 @@ def plot_mass_balance(grid, timestepList ):
     """ This function plots the mass balances of differenc components in the aqueous 
     phases and displays them in chart form.
     """
-    font = { 'size' : 20}
-    matplotlib.rc('font', **font)
-    matplotlib.rcParams.update({'font.size':20})
+    matplotlib.rcParams.update({'font.size':12})
     
     # create total mass balance chart
     aq_m_tot = []

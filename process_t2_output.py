@@ -42,7 +42,7 @@ if __name__ == '__main__':
         sys.exit( "Please specify a simulation title")
     sim_title = sys.argv[1]
     hydro = False
-    two_d = True
+    two_d = False
     sleipner = True
     section = False
     # creates a T2Grid object and a list of T2Timestep objects
@@ -58,9 +58,9 @@ if __name__ == '__main__':
         # sleipner
         if sleipner == True:
             eleme = 'IH732'
-            k_layer = 15
-            xind = 65/2
-            yind = 119/2
+            k_layer = 3
+            xind = 32
+            yind = 77
             if section == True:
                 eleme = 'AE717'
                 xind = 17

@@ -28,7 +28,7 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     simtime_days = [simtime_years * 365]
 
     # density of C02 [kg/m^3]
-    co2_rho = 720.
+    co2_rho = 700.
     #density of brine [kg/m^3]
     brine_rho = 1020.
     #viscosity of CO2 [Pa s]
@@ -92,10 +92,10 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     return 0
 
 if __name__ == '__main__':
-    layer_id = 'sl_const'
+    layer_id = 'sl_const_iso'
     timestep_days = 0.5
-    output_days = 365.25
-    simtime_years = 11
+    output_days = 15
+    simtime_years = 0.083
     vesa_make_input(layer_id, uniform = False, hydro = False,\
             timestep_days = timestep_days, output_days = output_days,\
             simtime_years = simtime_years)
