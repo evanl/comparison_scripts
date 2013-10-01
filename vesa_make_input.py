@@ -3,6 +3,7 @@ import vesa_writing_functions as wf
 import read_eclipse as re
 import eclipse_cells as ec
 from time import clock
+import sys
 
 def vesa_make_input(layer_id, uniform = False, hydro = False,\
         timestep_days = 1., output_days = 365, simtime_years = 11):
@@ -92,10 +93,13 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     return 0
 
 if __name__ == '__main__':
-    layer_id = 'sl_const_iso'
+    if len(sys.argv) != 2:
+        print "Please run vesa_make_input in the following way: \n"
+        print "$ python vesa_make_input.py <layer_id/simtitle>"
+    layer_id = sys.argv[1]
     timestep_days = 0.5
     output_days = 15
-    simtime_years = 0.083
+    simtime_years = 0.084
     vesa_make_input(layer_id, uniform = False, hydro = False,\
             timestep_days = timestep_days, output_days = output_days,\
             simtime_years = simtime_years)

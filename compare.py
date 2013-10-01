@@ -7,7 +7,7 @@ import sys
 import os
 from subprocess import call
 import tough.t2.process_t2_output as pt2
-import vesa.VESA_02_01_13.vesa_output_read as pv
+import vesa.VESA_02_01_13.vesa_reading_functions as vr
 
 class Compare:
     def __init__(self, vesa_simtitle, tough_simtitle,\
@@ -28,7 +28,7 @@ class Compare:
         # this reads the output for a given unit, but will not work for 
         # multiple units. the positions will have to be combined for that later
         os.chdir(vesa_dirname)
-        vesa_cells, vesa_timesteps = pv.read_output_data(layer = vesa_simtitle)
+        vesa_cells, vesa_timesteps = vr.read_output_data(layer = vesa_simtitle)
 
         os.chdir(current_directory)
         print "yay"
@@ -88,6 +88,27 @@ class Compare:
                 pos +=1
                 self.plot_contour(x,y,z, position = pos, \
                         label = 'saturation []')
+        return 0
+    def add_vesa_sections(self, axis, index, nx):
+        pos = 324
+        for i in range(2):
+            pos +=1
+            ys, zb, zt, plume = vr.make_cross_sections(self.vesa_cells, \
+                    i, axis, index, nx)
+            self.plot_graph(ys, plume, pos)
+            self.plot_graph(ys, zb, pos)
+            self.plot_graph(ys, zt, pos)
+        return 0
+    def create_cross_section_comparison(self):
+        self.create_blank_figure(compare_type ='section')
+        fmt = 'eps'
+        self.set_font_size(size = 8)
+        x_ind = 32
+        y_ind = 77
+        self.add_t2_contours(2, x_ind, 'saturation')
+        self.add_vesa_sections(1, 32, 65)
+        self.f.savefig('x_section_saturation.'+fmt, bbox_inches='tight',format=fmt)
+        self.f.clf()
 
 
 if __name__ == '__main__': 
@@ -110,17 +131,5 @@ if __name__ == '__main__':
     xg = np.asarray(xl)
     yg = np.asarray(yl1)
 
-    c.create_blank_figure(compare_type ='section')
-    fmt = 'eps'
-    c.set_font_size(size = 8)
-    #pos = 320
-    #for i in range(4):
-        #pos +=1
-        #c.plot_contour(x, y, z, position = pos, label = 'values[units]')
-    x_ind = 32
-    y_ind = 77
-    c.add_t2_contours(2, x_ind, 'saturation')
-    c.plot_graph(xg, yg, 325)
-    c.plot_graph(xg, yg, 326)
-    c.f.savefig('mfig.'+fmt, bbox_inches='tight',format=fmt)
-    c.f.clf()
+    c.create_cross_section_comparison()
+

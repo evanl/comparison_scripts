@@ -18,8 +18,6 @@ class Cell:
         self.pressure = []
         self.delta_p = []
         self.sat_thickness = []
-        for sat in self.saturation:
-            self.sat_thickness.append(sat * self.thickness)
 
     def __str__(self):
         a = str(self.get_x()) + ' '
@@ -128,6 +126,8 @@ def read_output_data(layer = 'SleipnerL9'):
         templine[-1] = templine[-1].replace('\n','')
         for i in range(0,len(templine)):
             cells[i].saturation.append(float(templine[i]))
+            cells[i].sat_thickness.append(\
+                    float(templine[i]) * cells[i].get_thickness())
         line = r.readline()
 
     r.close()
@@ -166,61 +166,24 @@ def mass_balance_read_print():
     for j in range(0,len(perdiff_mass)):
         f.write(str(j+1) + "     | " + str(perdiff_mass[j]) + "\n")
     f.close()
-
-def plot_vesa_saturation(cells, time_steps, nx, ny, \
-        valtype = "saturation", fmt = 'eps', sleipner = False):
-    font = { 'size' : '12'}
-    matplotlib.rc('font', **font)
-    for i in range(0,len(cells[0].get_item_list(valtype))):
-        print "Plotting Saturation timestep: " + str(i)
-        x, y, zsat = make_plot_grid(cells, i, nx, ny, valtype)
-        yrstring = '{:4d}'.format(int(time_steps[i]/365 + 1998))
-        if sleipner == True:
-            f_sat = plt.figure(num=None, figsize=(7.5,10), dpi = 480, \
-                facecolor = 'w', edgecolor = 'k')
-            f_sat.suptitle("CO2 " + valtype + " in " + yrstring )
-        else:
-            f_sat = plt.figure(num=None, figsize=(10,10), dpi = 480, \
-                facecolor = 'w', edgecolor = 'k')
-            f_sat.suptitle("CO2 "+valtype +  " on day: " +\
-                    str(time_steps[i]))
-        ax_sat = f_sat.add_subplot(111)
-        ax_sat.set_xlabel('x-direction [m]')
-        ax_sat.set_ylabel('y-direction [m]')
-        plt.xticks(np.arange(0,3050,1000))
-        n_levels = 21
-        if sleipner == True:
-            h = 15.
-        else:
-            h = 5.
-        if valtype == 'thickness':
-            v_val = np.linspace(0.,h,num=n_levels)
-        else: 
-            v_val = np.linspace(0.,0.8,num=n_levels)
-        cs_sat = ax_sat.contourf(x,y,zsat,v_val) 
-        ax_sat.set_aspect('equal')
-        cb_sat = plt.colorbar(cs_sat, shrink = 0.8, \
-                extend = 'both', ticks =v_val )
-        if valtype == 'thickness':
-            cb_sat.set_label("CO2 Plume Thickness [m]")
-        else:
-            cb_sat.set_label("CO2 Saturation []")
-        figstr = 'sat_' + '{:02d}'.format(i+1)
-        f_sat.savefig(figstr + "." + fmt ,bbox_inches='tight',\
-                format = fmt)
-        plt.clf()
-        plt.close()
         
 def val_bounds(cells, valtype):
     # calculates upper and lower bounds for pressure to ensure
     # comparable colorscales across contour plots
-    val_bound = []
-    for c in cells:
-        cvals = c.get_item_list(valtype)
-        for el in cvals:
-            val_bound.append(el)
-    v_min = min(val_bound)
-    v_max = max(val_bound)
+    if valtype == 'saturation':
+        v_min = 0.0
+        v_max = 0.8
+    elif valtype == 'thickness':
+        v_min = 0.0
+        v_max = 15.
+    else:
+        val_bound = []
+        for c in cells:
+            cvals = c.get_item_list(valtype)
+            for el in cvals:
+                val_bound.append(el)
+        v_min = min(val_bound)
+        v_max = max(val_bound)
     return v_min, v_max
 
 def make_plot_grid(cells, time_index, nx, ny, valtype):
@@ -244,36 +207,40 @@ def make_plot_grid(cells, time_index, nx, ny, valtype):
     zval = np.asarray(val)
     return x, y, zval
 
-def plot_timestep_contour(x, y, zval, time, i, valtype, v_val, sleipner, fmt):
+def plot_timestep_contour(x, y, zval, time, i, valtype, v_val, fmt):
     yrstring = '{:4d}'.format(int(time/365 + 1998))
-    if sleipner == True:
-        f_val = plt.figure(num=None, figsize=(7.5,10), dpi = 480, \
-            facecolor = 'w', edgecolor = 'k')
-        f_val.suptitle(valtype + " in " + yrstring )
-        plt.xticks(np.arange(0,3050,1000))
-    else:
-        f_val = plt.figure(num=None, figsize=(10,10), dpi = 480, \
-            facecolor = 'w', edgecolor = 'k')
-        f_val.suptitle(valtype + " on day" + str(time))
+    f_val = plt.figure(num=None, figsize=(7.5,10), dpi = 480, \
+        facecolor = 'w', edgecolor = 'k')
     ax_val = f_val.add_subplot(111)
     ax_val.set_xlabel('x-direction [m]')
     ax_val.set_ylabel('y-direction [m]')
     cs_val = ax_val.contourf(x,y,zval,v_val) 
     ax_val.set_aspect('equal')
+    if valtype =='pressure':
+        clab = valtype + " [Pa]"
+        cfm = '%.3e'
+    elif valtype == 'delta_p':
+        clab = valtype + " [Pa]"
+        cfm = '%.3e'
+    elif valtype == 'thickness':
+        clab = "CO2 Plume Thickness [m]"
+        cfm = '%.1f'
+    elif valtype == 'saturation':
+        clab = "CO2 Saturation []"
+        cfm = '%.2f'
     cb_val = plt.colorbar(cs_val, shrink = 0.8, \
-            extend = 'both', ticks = v_val, format='%.3e' )
-    cb_val.set_label(valtype + " [Pa]")
+            extend = 'both', ticks = v_val, format=cfm)
+    cb_val.set_label(clab)
     val_str = valtype + '_' + '{:02d}'.format(i+1)
+    f_val.suptitle(val_str)
     f_val.savefig(val_str + "." + fmt ,bbox_inches='tight', \
             format = fmt)
     plt.clf()
     plt.close()
-
     return 0
 
 def plot_vesa_timesteps(cells, time_steps, nx, ny,  \
-        valtype = 'pressure', fmt = 'eps', \
-        sleipner = False):
+        valtype = 'pressure', fmt = 'eps'):
     font = { 'size' : '12'}
     matplotlib.rc('font', **font)
 
@@ -285,7 +252,7 @@ def plot_vesa_timesteps(cells, time_steps, nx, ny,  \
         print "Plotting " + valtype +  " timestep: " + str(i)
         x, y, zval = make_plot_grid(cells, i, nx, ny, valtype)
         plot_timestep_contour(x, y, zval, time_steps[i], i, valtype, \
-             v_val, sleipner, fmt)
+             v_val, fmt)
 
 def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name, \
         x_well = 1600., y_well = 2057.75,\
@@ -303,8 +270,6 @@ def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name,
     # for that cell, get the pressure over time
     if well_head_index != 0:
         pres_list = cells[well_head_index].get_item_list('pressure')
-        print pres_list
-        print hydro_cells[well_head_index].get_item_list('pressure')[0]
         # add hydrostatic initial conditions
         pres_list.insert(0,\
                 hydro_cells[well_head_index].get_item_list('pressure')[0])
@@ -323,44 +288,48 @@ def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name,
         plt.clf()
         plt.close()
 
-def plot_cross_sections(cells, time_steps, axis = 1, index = 35, fmt = 'png', \
-        uniform = False):
+def make_cross_sections(cells, time_index, axis, index, nx):
+    plume = []
+    top = []
+    bot = []
+    y_list = []
+    tempsat = []
+    counter = 0
+    for cel in cells:
+        if (counter % nx ) == 0:
+            y_list.append(cel.get_y())
+            counter = 0
+        if counter == index:
+            plume.append(cel.get_item_list('thickness')[time_index])
+            top.append(cel.get_z_top())
+            bot.append(cel.get_z_bot())
+        counter +=1 
+
+    zb = np.asarray(bot)
+    zt = np.asarray(top)
+    ys = np.array(y_list)
+    zsat = np.asarray(plume)
+    plume = zt - zsat
+    if len(ys) != len(zt) != len(zb) != len(zsat):
+        print "NONEQUAL LENGTH ARRAYS"
+        return 1
+
+    return ys, zb, zt, plume
+
+def plot_cross_sections(cells, time_steps, nx, axis = 1, index = 32,\
+        fmt = 'png'):
     # make a plot of a vertical slice:
     # include top and bottom boundaries
     # include sharp interface saturation thickness
-
-    if uniform == False:
-        nx = 65
-    else: 
-        nx = 25
+    print "making cross section with axis: " + str(axis) + ", index: " +\
+            str(index)
     for i in range(0,len(cells[0].get_item_list('saturation'))):
         print "Plotting Cross Section ..." + str(i)
-        plume = []
-        top = []
-        bot = []
-        y_list = []
-        tempsat = []
-        counter = 0
-        for cel in cells:
-            if (counter % nx ) == 0:
-                y_list.append(cel.get_y())
-                counter = 0
-            if counter == index:
-                plume.append(cel.saturation[i] * cel.get_thickness())
-                top.append(cel.get_z_top())
-                bot.append(cel.get_z_bot())
-            counter +=1 
-
-        zb = np.asarray(bot)
-        zt = np.asarray(top)
-        ys = np.array(y_list)
-        zsat = np.asarray(plume)
-        plume = zt - zsat
-        print len(ys), len(zt), len(zb), len(zsat)
-
+        ys, zb, zt, plume = make_cross_sections(cells, i, axis, index, nx)
         f = plt.figure(num=None , dpi = 480, \
             facecolor = 'w', edgecolor = 'k')
-        title_string = 'Cross section of formation: Axis {0}, Index {1}'.format(axis, index)
+        title_string = \
+          'Cross section of formation: Axis {0}, Index {1}'.format(axis, index)
         f.suptitle(title_string)
         ax = f.add_subplot(111)
         ax.set_xlabel('distance [m]')

@@ -1,6 +1,7 @@
 #Author - Evan Leister
 import vesa_reading_functions as vr
 from subprocess import call
+import sys
 from time import time, clock
 import glob
 
@@ -19,8 +20,17 @@ def move_files(fmt, sim_title):
     return 0
 
 if __name__ == '__main__':
-    layer = 'sl_const_iso'
-    sim_title = 'sl_const_iso'
+    if len(sys.argv) == 2:
+        layer = sys.argv[1]
+        sim_title = sys.argv[1]
+    elif len(sys.argv) == 3:
+        layer = sys.argv[2]
+        sim_title = sys.argv[1]
+    else:
+        print "please run vesa_output_read in the following way \n"
+        print "$ python vesa_output_read.py <sim_title> (optional: <layer_id>)"
+        print "\n"
+
     fmt = 'png'
     
     cells, time_steps = vr.read_output_data(layer = layer)
@@ -34,11 +44,11 @@ if __name__ == '__main__':
     else:
         nx = 65
         ny = 119
-    vr.plot_cross_sections(cells, time_steps, axis = 1, index = nx/2, fmt = 'png',
-            uniform = uniform)
+    vr.plot_cross_sections(cells, time_steps, nx, axis = 1, index = nx/2, \
+            fmt = 'png')
     vr.mass_balance_read_print()
-    vr.plot_vesa_saturation(cells, time_steps, nx, ny, \
-            valtype="saturation", fmt = fmt, sleipner = sleipner)
+    vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
+            valtype="saturation", fmt = fmt)
     vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
             valtype="pressure", fmt = fmt, )
     vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
