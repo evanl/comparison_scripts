@@ -43,8 +43,9 @@ if __name__ == '__main__':
     sim_title = sys.argv[1]
     hydro = False
     two_d = False
-    sleipner = True
+    sleipner = False
     section = False
+    shale = True
     # creates a T2Grid object and a list of T2Timestep objects
     grid, time_steps = process_t2_output(sim_title)
     # choose format for plots.
@@ -82,7 +83,7 @@ if __name__ == '__main__':
     for basis in range(1,4):
         t2o.plot_planar_contours(grid, time_steps, sim_title, fmt, \
                 two_d = two_d, sleipner = sleipner, section = section,\
-                axis = basis,\
+                shale = shale, axis = basis,\
                 i_in = xind, j_in = yind, k_in = k_layer)
 
     t2o.plot_wellhead_pressure(grid, time_steps, \

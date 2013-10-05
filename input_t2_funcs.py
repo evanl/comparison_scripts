@@ -672,7 +672,7 @@ class T2InputGrid(object):
 
     def fill_3d_grid(self, e_cells , temperature = 37., density = 1000.,\
             two_d = False,  gradient = 10 , solubility = 0.474e-1, \
-            depth = 0., five_section = []):
+            five_section = [], shale = True):
         """Fills the 3d grid with x, y, and z
         'gradient' specifies the hydrostatic gradient. [MPa/km]
 
@@ -712,70 +712,80 @@ class T2InputGrid(object):
             temparray = []
             for j in range(self.ny-1, self.ny_start-1, -1):
                 temparrayz = []
+                sand_count = 0
                 for k in range(self.nz_start, nzi):
-                    count +=1
                     ind = self.e_cell_index(i, j, k)
                     eleme = self.get_element_chars(i, j, k)
-                    self.elements.append(eleme)
-                    # sets material id
-                    if e_cells[ind].getXPermeability() > 1 or two_d == True:
-                        self.mat[eleme] = 'sands'
-                    else:
-                        self.mat[eleme] = 'shale'
-
-                    oc = e_cells[ind].getCorners()
-                    corners = []
-                    for c in oc:
-                        x, y = c.getXY()
-                        # FLIPPING ALL ZS IN THIS. 
-                        z = - c.getZ()
-                        nc = self.Corner(x, y, z)
-                        corners.append(nc)
-                    self.corners[eleme] = corners
-
-                    # getting more precise center and volume
-                    x = self.get_x_centroid(corners)
-                    y = self.get_y_centroid(corners)
-                    z = self.get_z_centroid(corners)
-                    volume = self.get_volume(x, y, z, corners)
-
-                    if two_d == True:
-                        pc_count = []
-                        for k in range(self.nz):
-                            pc_ind = self.e_cell_index(i,j,k)
-                            if e_cells[pc_ind].getXPermeability() > 1.:
-                                pc_count.append(k)
-                        bot_ind = self.e_cell_index(i, j, pc_count[-1])
-                        top_ind = self.e_cell_index(i, j, pc_count[0])
-                        ztop = -e_cells[top_ind].getTopZ()
-                        zbot = -e_cells[bot_ind].getTopZ()
-                        self.z_top[eleme] = -zbot
-                        self.z_bot[eleme] = -ztop
-                        z =  0.5 * (ztop + zbot)
-                        dx = self.get_dx(eleme, 1)
-                        dy = self.get_dx(eleme, 2)
-                        dz = zbot - ztop
-                        volume = dx * dy * dz
-
-                    self.x[eleme] = x
-                    self.y[eleme] = y
-                    self.z[eleme] = z
-
-                    pressure = -z * gradient * density
-
-                    self.vol[eleme] = volume
-                    self.area[eleme] = 0.0
-                    self.pres[eleme] = pressure
-                    self.na_cl[eleme] = 3.2e-2
-                    self.x_co2[eleme] = solubility
-                    self.temp[eleme] = temperature
-                    temparrayz.append(eleme)
-                #el_array options
+                    if shale == True or e_cells[ind].getXPermeability() > 1.:
+                        if e_cells[ind].getXPermeability() > 1.:
+                            sand_count +=1
+                        count +=1
+                        self.elements.append(eleme)
+                        self.write_t2_cell(e_cells, ind, eleme,\
+                                temperature, density,\
+                                two_d, gradient, solubility)
+                        #el_array options
+                        temparrayz.append(eleme)
+                if sand_count != 34:
+                    print i, j, sand_count
                 temparray.append(temparrayz)
             self.el_array.append(temparray)
         print "GRID FILLING COMPLETE"
         print str(count) + " ELEMENTS CREATED"
+        print len(self.el_array), len(self.el_array[0]), len(self.el_array[0][0])
         return 0
+
+    def write_t2_cell(self, e_cells, ind, eleme,\
+            temperature = 37., density = 1000.,\
+            two_d = False,  gradient = 10 , solubility = 0.474e-1):
+        # sets material id
+        if e_cells[ind].getXPermeability() > 1 or two_d == True:
+            self.mat[eleme] = 'sands'
+        else:
+            self.mat[eleme] = 'shale'
+
+        oc = e_cells[ind].getCorners()
+        corners = []
+        for c in oc:
+            x, y = c.getXY()
+            # FLIPPING ALL ZS IN THIS. 
+            z = - c.getZ()
+            nc = self.Corner(x, y, z)
+            corners.append(nc)
+        self.corners[eleme] = corners
+
+        # getting more precise center and volume
+        x = self.get_x_centroid(corners)
+        y = self.get_y_centroid(corners)
+        z = self.get_z_centroid(corners)
+        volume = self.get_volume(x, y, z, corners)
+        if two_d == True:
+            pc_count = []
+            for k in range(self.nz):
+                pc_ind = self.e_cell_index(i,j,k)
+                if e_cells[pc_ind].getXPermeability() > 1.:
+                    pc_count.append(k)
+            bot_ind = self.e_cell_index(i, j, pc_count[-1])
+            top_ind = self.e_cell_index(i, j, pc_count[0])
+            ztop = -e_cells[top_ind].getTopZ()
+            zbot = -e_cells[bot_ind].getTopZ()
+            self.z_top[eleme] = -zbot
+            self.z_bot[eleme] = -ztop
+            z =  0.5 * (ztop + zbot)
+            dx = self.get_dx(eleme, 1)
+            dy = self.get_dx(eleme, 2)
+            dz = zbot - ztop
+            volume = dx * dy * dz
+        self.x[eleme] = x
+        self.y[eleme] = y
+        self.z[eleme] = z
+        pressure = -z * gradient * density
+        self.vol[eleme] = volume
+        self.area[eleme] = 0.0
+        self.pres[eleme] = pressure
+        self.na_cl[eleme] = 3.2e-2
+        self.x_co2[eleme] = solubility
+        self.temp[eleme] = temperature
 
     def get_x_centroid(self, corners):
         count = 0.
@@ -990,19 +1000,20 @@ class T2InputGrid(object):
         return 0.5 * h * (b1 + b2)
         
     def write_mesh(self, e_cel, two_d = False, uniform = False,\
-            boundary_type = 1):
+            boundary_type = 1, shale = True):
         """ populates grid and writes ELEME block of MESH
         """
         g = open('MESH', 'w')
         print "MESH created with:"
         print "writing ELEMENT block of input data"
         g.write('ELEME\r\n')
-
-
         if two_d == True:
             nzi = 1
         else:
-            nzi = self.nz
+            if shale == False:
+                nzi = 34
+            else:
+                nzi = self.nz
         count = 0 
         for i in range(0, self.nx - self.nx_start ):
             for j in range(0, self.ny - self.ny_start ):
@@ -1048,7 +1059,10 @@ class T2InputGrid(object):
         if two_d == True:
             nzi = 1
         else:
-            nzi = self.nz
+            if shale == False:
+                nzi = 34
+            else:
+                nzi = self.nz
         g.write('CONNE\r\n')
         count = 0 
         for i in range(0, self.nx - self.nx_start ):
@@ -1290,7 +1304,6 @@ class T2InputGrid(object):
             xg, yg = np.meshgrid(xlist, ylist)
             zg = np.asarray(zlist)
             zg = np.transpose(zg)
-            print xg.shape, yg.shape, zg.shape
             pg = np.asarray(plist)
             pg = np.transpose(pg)
 

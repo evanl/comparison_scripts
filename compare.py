@@ -37,8 +37,8 @@ class Compare:
         self.t2_timesteps = t2_timesteps
         self.vesa_cells = vesa_cells
         self.vesa_timesteps = vesa_timesteps
-        self.sleipner = True
-        self.section = False
+        self.sleipner = sleipner
+        self.section = section
 
     def create_blank_figure(self, compare_type = 'none'):
         if compare_type == 'section':
@@ -83,6 +83,7 @@ class Compare:
             for i in range(2):
                 self.t2_timesteps[i].make_plot_grid(self.t2_grid, axis, index,\
                         valtype)
+                print "Self.sleipner" + str(self.sleipner)
                 x, y, z = self.t2_timesteps[i].format_plot_grid(self.t2_grid, \
                         axis, self.sleipner, self.section)
                 pos +=1
@@ -99,15 +100,18 @@ class Compare:
             self.plot_graph(ys, zb, pos)
             self.plot_graph(ys, zt, pos)
         return 0
-    def create_cross_section_comparison(self):
+    def create_cross_section_comparison(self, title):
         self.create_blank_figure(compare_type ='section')
         fmt = 'eps'
         self.set_font_size(size = 8)
-        x_ind = 32
+        nx = 65
+        nx = 25
+        x_ind = nx/2
         y_ind = 77
         self.add_t2_contours(2, x_ind, 'saturation')
-        self.add_vesa_sections(1, 32, 65)
-        self.f.savefig('x_section_saturation.'+fmt, bbox_inches='tight',format=fmt)
+        self.add_vesa_sections(1, nx/2, nx)
+        #self.f.savefig('x_section_saturation.'+fmt, bbox_inches='tight',format=fmt)
+        self.f.savefig(title + '.' + fmt, bbox_inches='tight',format=fmt)
         self.f.clf()
 
 
@@ -117,7 +121,7 @@ if __name__ == '__main__':
                 "python compare.py <vesa_simtitle> <tough_simtitle>\n")
     vesa_simtitle = sys.argv[1]
     tough_simtitle = sys.argv[2]
-    sleipner = True
+    sleipner = False
     section = False
     c = Compare(vesa_simtitle, tough_simtitle, sleipner, section)
 
@@ -131,5 +135,6 @@ if __name__ == '__main__':
     xg = np.asarray(xl)
     yg = np.asarray(yl1)
 
-    c.create_cross_section_comparison()
+    title = 'unif_saturation_linear'
+    c.create_cross_section_comparison(title)
 

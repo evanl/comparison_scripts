@@ -54,7 +54,6 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
         nx = 25
         ny = 25
         nz = 1
-    if uniform == True:
         dx = 50.
         dy = 50.
         dz = 5.
@@ -67,6 +66,7 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
         unit.fill_uniform_grid(dx, dy, dz, center_depth, phi, k)
         xwell = 625.0
         ywell = 625.0
+        t_read = clock()
     else:
         e_cells, nx, ny, nz = re.read_eclipse()
         t_read = clock()
@@ -98,9 +98,9 @@ if __name__ == '__main__':
         print "$ python vesa_make_input.py <layer_id/simtitle>"
     layer_id = sys.argv[1]
     timestep_days = 0.5
-    output_days = 15
-    simtime_years = 0.084
-    vesa_make_input(layer_id, uniform = False, hydro = False,\
+    output_days = 5
+    simtime_years = 120 / 365.
+    vesa_make_input(layer_id, uniform = True, hydro = False,\
             timestep_days = timestep_days, output_days = output_days,\
             simtime_years = simtime_years)
 

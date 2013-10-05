@@ -420,7 +420,7 @@ class T2Timestep(object):
         self.plot_grid = vals
         return 0
 
-    def format_plot_grid(self, grid, axis, sleipner, section):
+    def format_plot_grid(self, grid, axis, sleipner, section, shale):
         """ spits out 3 numpy arrays"""
         if axis == 1:
             nxp = len(grid.x_vals)
@@ -428,7 +428,10 @@ class T2Timestep(object):
                 if section == True:
                     nyp = 5
                 else:
-                    nyp = 43
+                    if shale == True:
+                        nyp = 43
+                    else:
+                        nyp = 34
             else:
                 nyp = len(grid.z_vals)
         elif axis == 2:
@@ -437,7 +440,10 @@ class T2Timestep(object):
                 if section == True:
                     nyp = 5
                 else:
-                    nyp = 43
+                    if shale == True:
+                        nyp = 43
+                    else:
+                        nyp = 34
             else:
                 nyp = len(grid.z_vals)
         elif axis == 3:
@@ -461,12 +467,12 @@ class T2Timestep(object):
 
     def plot_planar_timestep(self, grid, axis, index, valtype, \
             name = 'test',fmt='png', sleipner = True, \
-            section = False):
+            section = False, shale = True):
         valstr = "Valtype = " + str(valtype) + '\n'
         axstr = "Axis =  " + str(axis) + '\n'
         indstr = "Index = " + str(index) 
         print "Plotting Planar Timestep: " + '\n' + valstr + axstr + indstr
-        xpl, ypl, val = self.format_plot_grid(grid, axis, sleipner, section)
+        xpl, ypl, val = self.format_plot_grid(grid, axis, sleipner, section, shale)
         f = plt.figure(num=None, dpi=480, facecolor= 'w',\
                 #figsize=(7.5,10), 
             edgecolor ='k')
@@ -663,7 +669,8 @@ def plot_incon_change_vs_index(grid, time_steps, \
     return 0
 
 def plot_planar_contours(grid, time_steps, sim_title, fmt='png',\
-        two_d = True, sleipner = True, section = False, axis = 3,\
+        two_d = True, sleipner = True, section = False, shale = True,\
+        axis = 3,\
         i_in = False, j_in = False, k_in = False):
     """ if axis is 3, standard 2d contour plots will be generated with 
         k as the z-direction index
@@ -692,21 +699,21 @@ def plot_planar_contours(grid, time_steps, sim_title, fmt='png',\
         time_steps[i].plot_planar_timestep(grid, axis = axis, index = index, \
                 valtype = 'pressure',\
                 name = sim_title, fmt = fmt, sleipner = sleipner,\
-                section = section)
+                section = section, shale = shale)
         # create pressure difference 
         time_steps[i].make_plot_grid(grid, axis = axis, index = index, \
                 valtype = 'delta_p')
         time_steps[i].plot_planar_timestep(grid, axis = axis, index = index,\
                 valtype = 'delta_p',\
                 name = sim_title, fmt = fmt, sleipner = sleipner,\
-                section = section)
+                section = section, shale = shale)
         # create saturation
         time_steps[i].make_plot_grid(grid, axis = axis, index = index, \
                 valtype = 'saturation')
         time_steps[i].plot_planar_timestep(grid, axis = axis, index = index,\
                 valtype = 'saturation',\
                 name = sim_title, fmt = fmt, sleipner = sleipner,\
-                section = section)
+                section = section, shale = shale)
     return 0
 
 def check_3d_hydro_pressure(grid, time_steps):

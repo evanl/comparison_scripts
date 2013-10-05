@@ -9,7 +9,8 @@ import input_t2_funcs as it2f
 def create_t2_input(sim_title, two_d = False, uniform = False,\
         sleipner = False, hydro = False, hydro_directory = False,\
         num_steps = 11, days_per_step = 365.25, fs = [],\
-        bc_type = 1, column = False, linear_rp = False ):
+        bc_type = 1, column = False, linear_rp = False,
+        shale = True):
     print 'CREATING TOUGH2 INPUT FILE'
     if two_d == True:
         eleme = 'aH732'
@@ -58,8 +59,8 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     else:
         porosity = 0.35
         xperm = 2.e-13
-        yperm = 2.e-13
-        zperm = 2.e-13
+        yperm = xperm
+        zperm = xperm / 100.
 
     cap = 'vanGenuchten'
     if linear_rp == False:
@@ -151,14 +152,14 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
                 altered_cell = altered_cell)
         e_cel = 'uniform'
         tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
-                boundary_type = bc_type)
+                boundary_type = bc_type, shale = shale)
     else:
         brine_density = 1019.35
         tg.fill_3d_grid(e_cel, temperature = 32., density = brine_density,\
                 two_d = two_d, solubility = solubility,\
-                five_section = fs)
+                five_section = fs, shale = shale)
         tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
-                boundary_type = bc_type)
+                boundary_type = bc_type, shale = shale)
 
 
     if hydro_directory == False:
@@ -198,10 +199,22 @@ if __name__ == '__main__':
     # using density estimates. If a directory is specified, the 
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
-    hd = False
-    hd = 'sl_twod_hydro'
-    print create_t2_input(sim_title, two_d = True, uniform = False, \
-            sleipner = True, hydro = False, hydro_directory = hd, \
-            num_steps = 11, days_per_step = 365.25, fs = fs_sec,\
-            bc_type = 1, column = column, linear_rp = True)
+    sleipner = False
+    shale = True
+    hydro = False
+    uniform = True
+    
+    # sanity check
+    if hydro == False:
+        hd = False
+    else:
+        hd = 'unif_hydro'
+    if uniform == True:
+        shale = True
+        sleipner = False
+    print create_t2_input(sim_title, two_d = False, uniform = uniform, \
+            sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
+            num_steps = 24, days_per_step = 5, fs = fs_sec,\
+            bc_type = 1, column = column, linear_rp = False,\
+            shale = shale)
 

@@ -36,8 +36,8 @@ if __name__ == '__main__':
     cells, time_steps = vr.read_output_data(layer = layer)
     t_read = clock()
 
-    uniform = False
-    sleipner = True
+    uniform = True
+    sleipner = False
     if uniform == True:
         nx = 25
         ny = 25
@@ -57,8 +57,8 @@ if __name__ == '__main__':
     print "Creating directory: " + sim_title 
     call(["mkdir",sim_title])
 
-    hydro_folder = "hydro_660"
-    hydro_layer_name = "SleipnerL9"
+    hydro_folder = "unif_hydro"
+    hydro_layer_name = "unif_hydro"
     vr.plot_wellhead_pressure(cells, time_steps, hydro_folder, hydro_layer_name,\
             fmt = fmt, sleipner = False )
 
