@@ -40,20 +40,23 @@ class Compare:
         self.sleipner = sleipner
         self.section = section
 
-    def create_blank_figure(self, compare_type = 'none'):
+    def create_blank_figure(self, fontsize = 10, compare_type = 'none'):
+        self.set_font_size(size = fontsize)
         if compare_type == 'section':
             self.f = plt.figure(figsize=(12.0,10.0), dpi=480)
         elif compare_type == 'horizontal':
-            self.f = plt.figure(figsize=(10.0,12.0), dpi=480)
+            self.f = plt.figure(figsize=(8.0,10.0), dpi=480)
         else:
             self.f = plt.figure()
+        return 0
 
     def set_font_size(self, size = 'small'):
         #font = {'family': 'scalable', 'weight' : 'bold', 'size' : size}
         font = {'size' : size}
         matplotlib.rc('font', **font)
+        return 0
 
-    def plot_contour(self, x, y, z, position = 111, label = 'values [units]',\
+    def plot_contour(self, x, y, z, position = 111, label = False,\
             xlab = 'x [m]', ylab = 'z [m]'):
         """ takes in numpy arrays of same shape
         """
@@ -66,9 +69,13 @@ class Compare:
             CS = ax_c.contourf(x,y,z)
         CB = plt.colorbar(CS, shrink = 1.0, pad=0.02, fraction = 0.07,\
                 extend = 'both', format='%.2f')
-        CB.set_label(label)
+        if label != False:
+            CB.set_label(label)
+
         ax_c.set_xlabel(xlab)
         ax_c.set_ylabel(ylab)
+        return 0
+
     def plot_graph(self, x, y, position = 111, \
             xlab = 'x [m]', ylab = 'z [m]'):
         """ takes in two 1d numpy arrays
@@ -77,6 +84,8 @@ class Compare:
         ax_g.plot(x,y )
         ax_g.set_xlabel(xlab)
         ax_g.set_ylabel(ylab)
+        return 0
+
     def add_t2_contours(self, axis, index, valtype):
         pos = 320
         for j in range(2):
@@ -90,6 +99,7 @@ class Compare:
                 self.plot_contour(x,y,z, position = pos, \
                         label = 'saturation []')
         return 0
+
     def add_vesa_sections(self, axis, index, nx):
         pos = 324
         for i in range(2):
@@ -100,10 +110,18 @@ class Compare:
             self.plot_graph(ys, zb, pos)
             self.plot_graph(ys, zt, pos)
         return 0
+
+    def add_vesa_contours(self, nx, ny, valtype):
+        x, y, zval = vr.make_plot_grid(self.cells, time_index, \
+                nx, ny, valtype)
+        self.plot_contour(x, y, zval, position = pos,\
+                label = valtype)
+
+        return 0
+
     def create_cross_section_comparison(self, title):
         self.create_blank_figure(compare_type ='section')
         fmt = 'eps'
-        self.set_font_size(size = 8)
         nx = 65
         nx = 25
         x_ind = nx/2
@@ -113,6 +131,7 @@ class Compare:
         #self.f.savefig('x_section_saturation.'+fmt, bbox_inches='tight',format=fmt)
         self.f.savefig(title + '.' + fmt, bbox_inches='tight',format=fmt)
         self.f.clf()
+        return 0
 
 
 if __name__ == '__main__': 
@@ -121,8 +140,8 @@ if __name__ == '__main__':
                 "python compare.py <vesa_simtitle> <tough_simtitle>\n")
     vesa_simtitle = sys.argv[1]
     tough_simtitle = sys.argv[2]
-    sleipner = False
-    section = False
+    sleipner = True
+    section = True
     c = Compare(vesa_simtitle, tough_simtitle, sleipner, section)
 
     cl = [[1.,2.,3.],[4.,5.,6.],[7.,8.,9.]]
@@ -136,5 +155,17 @@ if __name__ == '__main__':
     yg = np.asarray(yl1)
 
     title = 'unif_saturation_linear'
-    c.create_cross_section_comparison(title)
+    #c.create_cross_section_comparison(title)
+    c.create_blank_figure(fontsize = 4, compare_type = 'horizontal')
+    pos = 230
+    for i in range(3):
+        pos += 1
+        c.plot_contour(x, y, z, position = pos)
+    for i in range(3):
+        pos +=1
+        c.plot_contour(x, y, z, position = pos)
+    fmt = 'eps'
+    c.f.savefig('testhoriz.eps',bbox_inches='tight',format=fmt)
+    c.f.clf()
+
 

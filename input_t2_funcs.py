@@ -423,8 +423,13 @@ def write_foft(f):
     f.write('\r\n')
     return f
 
-def write_coft(f):
+def write_coft(f, sleipner):
     write_separator(f, 'COFT ')
+    if sleipner == True:
+        f.write('bH732cH732\r\n')
+    else:
+        #f.write('aB212bB212\r\n')
+        f.write('xB212yB212\r\n')
     f.write('\r\n')
     return f
 
@@ -721,13 +726,11 @@ class T2InputGrid(object):
                             sand_count +=1
                         count +=1
                         self.elements.append(eleme)
-                        self.write_t2_cell(e_cells, ind, eleme,\
+                        self.write_t2_cell(e_cells, i, j, k,\
                                 temperature, density,\
                                 two_d, gradient, solubility)
                         #el_array options
                         temparrayz.append(eleme)
-                if sand_count != 34:
-                    print i, j, sand_count
                 temparray.append(temparrayz)
             self.el_array.append(temparray)
         print "GRID FILLING COMPLETE"
@@ -735,9 +738,11 @@ class T2InputGrid(object):
         print len(self.el_array), len(self.el_array[0]), len(self.el_array[0][0])
         return 0
 
-    def write_t2_cell(self, e_cells, ind, eleme,\
+    def write_t2_cell(self, e_cells, i, j, k,\
             temperature = 37., density = 1000.,\
             two_d = False,  gradient = 10 , solubility = 0.474e-1):
+        ind = self.e_cell_index(i, j, k)
+        eleme = self.get_element_chars(i, j, k)
         # sets material id
         if e_cells[ind].getXPermeability() > 1 or two_d == True:
             self.mat[eleme] = 'sands'
@@ -767,15 +772,34 @@ class T2InputGrid(object):
                     pc_count.append(k)
             bot_ind = self.e_cell_index(i, j, pc_count[-1])
             top_ind = self.e_cell_index(i, j, pc_count[0])
-            ztop = -e_cells[top_ind].getTopZ()
-            zbot = -e_cells[bot_ind].getTopZ()
-            self.z_top[eleme] = -zbot
-            self.z_bot[eleme] = -ztop
-            z =  0.5 * (ztop + zbot)
-            dx = self.get_dx(eleme, 1)
-            dy = self.get_dx(eleme, 2)
-            dz = zbot - ztop
-            volume = dx * dy * dz
+            #ztop = -e_cells[top_ind].gettopz()
+            #zbot = -e_cells[bot_ind].getTopZ()
+            #self.z_top[eleme] = -zbot
+            #self.z_bot[eleme] = -ztop
+            #z =  0.5 * (ztop + zbot)
+            #dx = self.get_dx(eleme, 1)
+            #dy = self.get_dx(eleme, 2)
+            #dz = zbot - ztop
+            #volume = dx * dy * dz
+            #new idea
+            tc = e_cells[top_ind].getCorners()
+            bc = e_cells[bot_ind].getCorners()
+            corners = []
+            for c_ind in range(4):
+                x, y = tc[c_ind].getXY()
+                z = -tc[c_ind].getZ()
+                nc = self.Corner(x, y, z)
+                corners.append(nc)
+            for c_ind in range(4,8):
+                x,y = bc[c_ind].getXY()
+                z = -bc[c_ind].getZ()
+                nc = self.Corner(x,y,z)
+                corners.append(nc)
+            self.corners[eleme] = corners
+            x = self.get_x_centroid(corners)
+            y = self.get_y_centroid(corners)
+            z = self.get_z_centroid(corners)
+            volume = self.get_volume(x, y, z, corners)
         self.x[eleme] = x
         self.y[eleme] = y
         self.z[eleme] = z

@@ -28,7 +28,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
         nz = 25
         dx = 50
         dy = 50
-        dz = 0.2
+        dz = 0.6
     else:
         e_cel, nx, ny, nz = re.read_eclipse()
 
@@ -60,7 +60,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
         porosity = 0.35
         xperm = 2.e-13
         yperm = xperm
-        zperm = xperm / 100.
+        zperm = xperm 
 
     cap = 'vanGenuchten'
     if linear_rp == False:
@@ -126,7 +126,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
 
     it2f.write_times(f, output_day_list)
     it2f.write_foft(f)
-    it2f.write_coft(f)
+    it2f.write_coft(f, sleipner)
     it2f.write_goft(f)
     it2f.write_separator(f, 'ENDCY')
     f.close()
@@ -199,22 +199,25 @@ if __name__ == '__main__':
     # using density estimates. If a directory is specified, the 
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
-    sleipner = False
+    sleipner = True
     shale = True
     hydro = False
-    uniform = True
+    uniform = False
+    two_d = True
     
     # sanity check
-    if hydro == False:
+    if hydro == True:
         hd = False
+        bc_type = 2
     else:
-        hd = 'unif_hydro'
+        hd = 'sl_twod_hydro_newidea'
+        bc_type = 1
     if uniform == True:
         shale = True
         sleipner = False
-    print create_t2_input(sim_title, two_d = False, uniform = uniform, \
+    print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 24, days_per_step = 5, fs = fs_sec,\
-            bc_type = 1, column = column, linear_rp = False,\
+            num_steps = 11, days_per_step = 365.25, fs = fs_sec,\
+            bc_type = bc_type, column = column, linear_rp = True,\
             shale = shale)
 

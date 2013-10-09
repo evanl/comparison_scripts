@@ -835,3 +835,36 @@ def write_viscosity(grid, time_steps):
             f.write('NO CO2 in DOMAIN for this simulation')
     f.close()
     return 0
+
+def read_coft():
+    try:
+        with open('COFT','r'):
+            f = open('COFT','r')
+            line = f.readline()
+            s = line.split(',')
+            time = []
+            flux_1 = []
+            flux_2 = []
+            flux_3 = []
+            while line:
+                time.append(float(s[1]))
+                flux_1.append(float(s[3]))
+                flux_2.append(float(s[4]))
+                flux_3.append(float(s[5]))
+                line = f.readline()
+                s = line.split(',')
+
+            t = np.asarray(time)
+            f1 = np.asarray(flux_1)
+            f2 = np.asarray(flux_2)
+            f3 = np.asarray(flux_3)
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            ax.plot(t, f1, label='gas flow')
+            ax.plot(t, f2, label='liquid flow')
+            ax.plot(t, f3, label='total flow')
+            ax.legend()
+            plt.show()
+    except IOError:
+        print "COFT WAS NOT GENERATED"
+    return 0

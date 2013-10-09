@@ -248,10 +248,11 @@ def plot_vesa_timesteps(cells, time_steps, nx, ny,  \
     v_min, v_max = val_bounds(cells, valtype)
     v_val = np.linspace(v_min, v_max, num = n_levels)
     
-    for i in range(0,len(cells[0].get_item_list(valtype))):
-        print "Plotting " + valtype +  " timestep: " + str(i)
-        x, y, zval = make_plot_grid(cells, i, nx, ny, valtype)
-        plot_timestep_contour(x, y, zval, time_steps[i], i, valtype, \
+    for time_index in range(0,len(cells[0].get_item_list(valtype))):
+        print "Plotting " + valtype +  " timestep: " + str(time_index)
+        x, y, zval = make_plot_grid(cells, time_index, nx, ny, valtype)
+        plot_timestep_contour(x, y, zval, time_steps[time_index], \
+                time_index, valtype, \
              v_val, fmt)
 
 def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name, \

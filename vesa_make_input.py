@@ -56,7 +56,7 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
         nz = 1
         dx = 50.
         dy = 50.
-        dz = 5.
+        dz = 15.
         center_depth = 862.
         phi = 0.35
         k = 200
