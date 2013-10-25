@@ -274,8 +274,10 @@ def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name,
         # add hydrostatic initial conditions
         pres_list.insert(0,\
                 hydro_cells[well_head_index].get_item_list('pressure')[0])
+        print pres_list
         time_steps.insert(0,0.)
-        pres = np.asarray(pres_list)/pow(10.,3.)
+        pres = np.asarray(pres_list)
+        pres = pres/pow(10.,3)
         time_ar = np.asarray(time_steps)
 
         f = plt.figure(num=None , dpi = 480, \

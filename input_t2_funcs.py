@@ -261,7 +261,7 @@ def write_start(f):
     return f
 
 def write_param(f, init_check = False, pres = 110.5e5, salt = 3.2e-2, co2 = 0.0, temp = 37., \
-    tmax = 63.1152e6):
+    tmax = 63.1152e6, tolexp = -7):
     write_separator(f, 'PARAM')
 
     # line 1
@@ -288,7 +288,8 @@ def write_param(f, init_check = False, pres = 110.5e5, salt = 3.2e-2, co2 = 0.0,
     #                         gravity
     f.write(20 * ' ' + '      10.0\r\n')
     f.write('      1.e2\r\n')
-    f.write('     1.E-5' + '     1.E00\r\n')
+    tolstr = '{:03d}'.format(tolexp)
+    f.write('    1.E' + tolstr + '    1.E-01\r\n')
 
     # default initial conditions
     s1 = '{: 10.3e}'.format(pres)
@@ -304,7 +305,11 @@ def write_param(f, init_check = False, pres = 110.5e5, salt = 3.2e-2, co2 = 0.0,
 
 def write_solvr(f, tolexp = -7):
     write_separator(f,'SOLVR')
-    f.write('5  Z1   O0    8.0e-1    1.0e' +str(tolexp)+'\r\n')
+    if tolexp < -12 or tolexp > -6:
+        print "tolexp must be between -12 and -6"
+        return 1
+    tolstr = '{:03d}'.format(tolexp)
+    f.write('5  Z3   O0    8.0e-1   1.0e' + tolstr +'\r\n')
     return f
 
 def write_gener(f, eleme, phase = 'brine', mass_rate = .1585, column = False,\
@@ -426,7 +431,8 @@ def write_foft(f):
 def write_coft(f, sleipner):
     write_separator(f, 'COFT ')
     if sleipner == True:
-        f.write('bH732cH732\r\n')
+        #f.write('bH732cH732\r\n')
+        dummy =1
     else:
         #f.write('aB212bB212\r\n')
         f.write('xB212yB212\r\n')
@@ -722,6 +728,9 @@ class T2InputGrid(object):
                     ind = self.e_cell_index(i, j, k)
                     eleme = self.get_element_chars(i, j, k)
                     if shale == True or e_cells[ind].getXPermeability() > 1.:
+                        if i == 32:
+                            if j == 77:
+                                print k, e_cells[ind].getXPermeability()
                         if e_cells[ind].getXPermeability() > 1.:
                             sand_count +=1
                         count +=1

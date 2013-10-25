@@ -9,8 +9,8 @@ import input_t2_funcs as it2f
 def create_t2_input(sim_title, two_d = False, uniform = False,\
         sleipner = False, hydro = False, hydro_directory = False,\
         num_steps = 11, days_per_step = 365.25, fs = [],\
-        bc_type = 1, column = False, linear_rp = False,
-        shale = True):
+        bc_type = 1, column = False, linear_rp = False,\
+        linear_cap = False, shale = True, tolerance = -7):
     print 'CREATING TOUGH2 INPUT FILE'
     if two_d == True:
         eleme = 'aH732'
@@ -55,14 +55,18 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
         porosity = 0.35 
         xperm = 2.e-12
         yperm = 2.e-12
-        zperm = 2.e-12
+        zperm = xperm / 3.
     else:
         porosity = 0.35
         xperm = 2.e-13
         yperm = xperm
         zperm = xperm 
 
-    cap = 'vanGenuchten'
+    if linear_cap == False:
+        cap = 'vanGenuchten'
+    else: 
+        cap = 'linear'
+
     if linear_rp == False:
         rel_perm = 'vanGenuchten'
     else:
@@ -71,10 +75,10 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     if cap == 'vanGenuchten':
         cp_vals = [0.4, 0.2, 1.61e-5, 1.e7, 0.999]
     else:
-        cp_vals = [2.0e4, 0.0, 1.0]# linear
+        cp_vals = [8.0e4, 0.2, 1.0]# linear
 
     if rel_perm == 'vanGenuchten':
-        rp_vals = [0.4, 0.2, 1.0, 0.05]
+        rp_vals = [0.8, 0.2, 1.0, 0.05]
     else:
         rp_vals = [0.2, 0., 1., 1.]# linear
 
@@ -102,8 +106,9 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     it2f.write_multi(f)
     it2f.write_selec(f)
     it2f.write_start(f)
-    it2f.write_param(f, tmax = output_day_list[-1] * 24 * 3600)
-    it2f.write_solvr(f)
+    it2f.write_param(f, tmax = output_day_list[-1] * 24 * 3600,\
+            tolexp = tolerance)
+    it2f.write_solvr(f )
 
     phase = 'co2'
     if hydro == True:
@@ -203,21 +208,22 @@ if __name__ == '__main__':
     shale = True
     hydro = False
     uniform = False
-    two_d = True
-    
+    two_d = False
     # sanity check
     if hydro == True:
         hd = False
         bc_type = 2
     else:
         hd = 'sl_twod_hydro_newidea'
+        #hd = 'unif_15m_hydro'
+        hd = 'sl_noshale_hydro'
         bc_type = 1
     if uniform == True:
         shale = True
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 11, days_per_step = 365.25, fs = fs_sec,\
+            num_steps = 4, days_per_step = 15, fs = fs_sec,\
             bc_type = bc_type, column = column, linear_rp = True,\
-            shale = shale)
+            linear_cap = True, shale = shale, tolerance = -5)
 

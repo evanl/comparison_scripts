@@ -868,3 +868,27 @@ def read_coft():
     except IOError:
         print "COFT WAS NOT GENERATED"
     return 0
+
+def plot_timesteps(filename):
+    f = open(filename,'r')
+    line = f.readline()
+    s = line.split()
+    timesteps = []
+    while line:
+        if len(s) > 8 and s[6] == 'DT':
+            timesteps.append(float(s[8])/3600.)
+        elif len(s) > 8 and s[5] == 'DT':
+            timesteps.append(float(s[7])/3600.)
+        line = f.readline()
+        s = line.split()
+    f.close()
+    steps = np.asarray(timesteps)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(steps)
+    ax.set_xlabel('step')
+    ax.set_ylabel('time[hr]')
+    plt.show()
+    
+                
+
