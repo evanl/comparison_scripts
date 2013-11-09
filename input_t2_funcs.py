@@ -284,10 +284,11 @@ def write_param(f, init_check = False, pres = 110.5e5, salt = 3.2e-2, co2 = 0.0,
     del l[-2]
     c = ''.join(l)
     f.write(c)
-    f.write('       -1.')
+    f.write('     0.8e6')
+    #f.write('       -1.')
     #                         gravity
-    f.write(20 * ' ' + '      10.0\r\n')
-    f.write('      1.e2\r\n')
+    f.write(20 * ' ' + '      9.81\r\n')
+    #f.write('      1.e2\r\n')
     tolstr = '{:03d}'.format(tolexp)
     f.write('    1.E' + tolstr + '    1.E-01\r\n')
 
@@ -303,13 +304,18 @@ def write_param(f, init_check = False, pres = 110.5e5, salt = 3.2e-2, co2 = 0.0,
     f.write('\r\n')
     return f
 
-def write_solvr(f, tolexp = -7):
+def write_solvr(f, linsolve_int, preprocess_int, tolexp = -7):
     write_separator(f,'SOLVR')
     if tolexp < -12 or tolexp > -6:
         print "tolexp must be between -12 and -6"
         return 1
     tolstr = '{:03d}'.format(tolexp)
-    f.write('5  Z3   O0    8.0e-1   1.0e' + tolstr +'\r\n')
+    if linsolve_int < 2 or linsolve_int > 6:
+        print "pick a correct linear solver"
+        return 1
+    f.write(str(linsolve_int) + \
+            '  Z'+ str(preprocess_int) + \
+            '   O0    1.0e-1   1.0e' + tolstr +'\r\n')
     return f
 
 def write_gener(f, eleme, phase = 'brine', mass_rate = .1585, column = False,\

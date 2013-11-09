@@ -873,22 +873,24 @@ def plot_timesteps(filename):
     f = open(filename,'r')
     line = f.readline()
     s = line.split()
+    time = []
     timesteps = []
     while line:
         if len(s) > 8 and s[6] == 'DT':
+            time.append(float(s[5])/(3600.))
             timesteps.append(float(s[8])/3600.)
         elif len(s) > 8 and s[5] == 'DT':
+            time.append(float(s[4])/(3600.))
             timesteps.append(float(s[7])/3600.)
         line = f.readline()
         s = line.split()
     f.close()
     steps = np.asarray(timesteps)
+    time_vals = np.asarray(time)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot(steps)
-    ax.set_xlabel('step')
-    ax.set_ylabel('time[hr]')
+    ax.plot(time_vals, steps)
+    ax.set_xlabel('time[hr]')
+    ax.set_ylabel('timestep[hr]')
     plt.show()
     
-                
-
