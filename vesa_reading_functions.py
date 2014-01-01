@@ -207,7 +207,8 @@ def make_plot_grid(cells, time_index, nx, ny, valtype):
     zval = np.asarray(val)
     return x, y, zval
 
-def plot_timestep_contour(x, y, zval, time, i, valtype, v_val, fmt):
+def plot_timestep_contour(x, y, zval, time, i, valtype, v_val, fmt,\
+        yearwise = False):
     yrstring = '{:4d}'.format(int(time/365 + 1998))
     f_val = plt.figure(num=None, figsize=(7.5,10), dpi = 480, \
         facecolor = 'w', edgecolor = 'k')
@@ -231,7 +232,10 @@ def plot_timestep_contour(x, y, zval, time, i, valtype, v_val, fmt):
     cb_val = plt.colorbar(cs_val, shrink = 0.8, \
             extend = 'both', ticks = v_val, format=cfm)
     cb_val.set_label(clab)
-    val_str = valtype + '_' + '{:02d}'.format(i+1)
+    if yearwise == True:
+        val_str = valtype + '_' + yrstring
+    else:
+        val_str = valtype + '_' + '{:02d}'.format(i+1)
     f_val.suptitle(val_str)
     f_val.savefig(val_str + "." + fmt ,bbox_inches='tight', \
             format = fmt)
@@ -240,7 +244,7 @@ def plot_timestep_contour(x, y, zval, time, i, valtype, v_val, fmt):
     return 0
 
 def plot_vesa_timesteps(cells, time_steps, nx, ny,  \
-        valtype = 'pressure', fmt = 'eps'):
+        valtype = 'pressure', fmt = 'eps', yearwise = False):
     font = { 'size' : '12'}
     matplotlib.rc('font', **font)
 
@@ -252,8 +256,7 @@ def plot_vesa_timesteps(cells, time_steps, nx, ny,  \
         print "Plotting " + valtype +  " timestep: " + str(time_index)
         x, y, zval = make_plot_grid(cells, time_index, nx, ny, valtype)
         plot_timestep_contour(x, y, zval, time_steps[time_index], \
-                time_index, valtype, \
-             v_val, fmt)
+                time_index, valtype, v_val, fmt, yearwise = yearwise)
 
 def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name, \
         x_well = 1600., y_well = 2057.75,\
@@ -320,7 +323,7 @@ def make_cross_sections(cells, time_index, axis, index, nx):
     return ys, zb, zt, plume
 
 def plot_cross_sections(cells, time_steps, nx, axis = 2, index = 32,\
-        fmt = 'png'):
+        fmt = 'png', yearwise = False):
     # make a plot of a vertical slice:
     # include top and bottom boundaries
     # include sharp interface saturation thickness
@@ -333,7 +336,11 @@ def plot_cross_sections(cells, time_steps, nx, axis = 2, index = 32,\
             facecolor = 'w', edgecolor = 'k')
         title_string = \
           'Cross section of formation: Axis {0}, Index {1}'.format(axis, index)
-        title_string += ' at time t = {0} days'.format(time_steps[i])
+        yrstring = '{:4d}'.format(int(time_steps[i]/365 + 1998))
+        if yearwise == True:
+            title_string += ' in ' + yrstring
+        else:
+            title_string += ' at time t = {0} days'.format(time_steps[i])
         f.suptitle(title_string)
         ax = f.add_subplot(111)
         ax.set_xlabel('distance [m]')

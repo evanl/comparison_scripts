@@ -1,5 +1,7 @@
 #Author - Evan Leister
 import eclipse_cells as ec
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Injector(object):
     def __init__(self, index, x, y, ratio, layer_id, end_intervals, mass_rate):
@@ -66,7 +68,8 @@ def write_system(timestep_days, output_days, simtime_years, output_control, laye
 class Layer(object):
     def __init__(self, layer_name, l_type, l_id, l_co2_rho, l_bri_rho, l_co2_mu,\
             l_bri_mu, sc_res, sb_res, c_co2, c_bri, c_roc, cap_rp_id, \
-            nx, ny, nz = 1, gradient = 10.):
+            nx, ny, nz = 1, gradient = 10.,\
+            homogeneous = False, permval = 2000.):
         """
         self.layer_name : Name of Text File
         l_type : Layer Type
@@ -102,6 +105,8 @@ class Layer(object):
         self.nx = nx
         self.ny = ny
         self.nz = nz
+        self.homogeneous = homogeneous
+        self.permval = permval
 
 
     def fill_uniform_grid(self, dx, dy, dz, center_depth, phi, k):
@@ -140,6 +145,36 @@ class Layer(object):
 
         return 0
 
+    def plot_perm_data(self, e_cells):
+        cell_ind = np.zeros(len(e_cells))
+        anis = np.zeros(len(e_cells))
+        depth = np.zeros(len(e_cells))
+        perm = np.zeros(len(e_cells))
+        for i in range(len(e_cells)):
+            cell_ind[i] = i
+            perm[i] = e_cells[i].getXPermeability()
+            anis[i] = e_cells[i].getZPermeability() / \
+                        e_cells[i].getXPermeability()
+            depth[i] = e_cells[i].getTopZ()
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111)
+        a = ax1.plot(cell_ind, anis)
+        ax1.set_xlabel('cell_index []')
+        ax1.set_ylabel('anisotropy kz/kx')
+        plt.savefig('ec_anis_cells.png')
+        print "plotting anisotropy ratio"
+        plt.close()
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(111)
+        b = ax2.scatter(depth, perm)
+        ax2.set_xlabel('depth [m]')
+        ax2.set_ylabel('permeability [md]')
+        plt.savefig('ec_perm_depth.png')
+        print "plotting permeabilityvsdepth"
+        plt.close()
+
+        return 0
+
     def fill_nonuniform_grid(self, e_cells):
         print "Filling nonuniform grid" 
         count = 0
@@ -159,6 +194,10 @@ class Layer(object):
                         columnphi.append(e_cells[ind].getPorosity())
                 # spits out the averages after the column index is filled.     
                 kmean, kvar = stats(columnk)
+                if self.homogeneous == True:
+                    k_write = self.permval
+                else:
+                    k_write = kmean
                 phimean , phivar = stats(columnphi)
 
                 top_b = -columnz[0]
@@ -210,7 +249,7 @@ class Layer(object):
                     south_bc = 1
 
                 pressure = -self.gradient * bottom_b * 1000
-                gc = GridCell(top_b, bottom_b, x, y, dx, dy, phimean, kmean,\
+                gc = GridCell(top_b, bottom_b, x, y, dx, dy, phimean, k_write,\
                         west_bc, east_bc, south_bc, north_bc, pressure)
                 self.grid_cells.append(gc)
 

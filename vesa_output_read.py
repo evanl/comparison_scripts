@@ -38,6 +38,7 @@ if __name__ == '__main__':
 
     uniform = False
     sleipner = True
+    yearwise = True
     if uniform == True:
         nx = 25
         ny = 25
@@ -45,14 +46,14 @@ if __name__ == '__main__':
         nx = 65
         ny = 119
     vr.plot_cross_sections(cells, time_steps, nx, axis = 1, index = nx/2, \
-            fmt = 'png')
+            fmt = 'png', yearwise = yearwise)
     vr.mass_balance_read_print()
     vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
-            valtype="saturation", fmt = fmt)
+            valtype="saturation", fmt = fmt, yearwise = yearwise)
     vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
-            valtype="pressure", fmt = fmt, )
+            valtype="pressure", fmt = fmt, yearwise = yearwise)
     vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
-            valtype="delta_p", fmt = fmt, )
+            valtype="delta_p", fmt = fmt, yearwise = yearwise)
 
     print "Creating directory: " + sim_title 
     call(["mkdir",sim_title])

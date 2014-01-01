@@ -6,7 +6,8 @@ from time import clock
 import sys
 
 def vesa_make_input(layer_id, uniform = False, hydro = False,\
-        timestep_days = 1., output_days = 365, simtime_years = 11):
+        timestep_days = 1., output_days = 365, simtime_years = 11,\
+        homogeneous = False):
     """  
     """
     print "creating input files"
@@ -29,11 +30,11 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     simtime_days = [simtime_years * 365]
 
     # density of C02 [kg/m^3]
-    co2_rho = 348.
+    co2_rho = 333.
     #density of brine [kg/m^3]
     brine_rho = 1020.
     #viscosity of CO2 [Pa s]
-    co2_mu = 2.41e-5
+    co2_mu = 2.42e-5
     #viscosity of brine [Pa s ]
     brine_mu = 6.9e-4
     #residual saturation of C02
@@ -74,8 +75,10 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
         print t_read
         unit = wf.Layer(layers[0], l_type, layer_id, co2_rho, brine_rho, co2_mu,\
                 brine_mu, sc_res, sb_res, c_co2, c_brine, c_rock, cap_rp_id,\
-                nx, ny, nz = nz, gradient = 10. )
+                nx, ny, nz = nz, gradient = 10., \
+                homogeneous = homogeneous, permval = 2000.)
         unit.fill_nonuniform_grid(e_cells)
+        #unit.plot_perm_data(e_cells)
         xwell = 1600.
         ywell = 2057.75
 
@@ -98,8 +101,11 @@ if __name__ == '__main__':
         print "$ python vesa_make_input.py <layer_id/simtitle>"
     layer_id = sys.argv[1]
     timestep_days = 0.5
-    output_days = 365.25/12.
+    output_days = 365.
     simtime_years = 11
-    vesa_make_input(layer_id, uniform = False, hydro = False,\
+    uniform = False
+    hydro = False
+    homogeneous = True
+    vesa_make_input(layer_id, uniform = hydro, hydro = hydro,\
             timestep_days = timestep_days, output_days = output_days,\
-            simtime_years = simtime_years)
+            simtime_years = simtime_years, homogeneous = homogeneous)
