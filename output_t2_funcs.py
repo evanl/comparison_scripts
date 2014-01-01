@@ -457,6 +457,7 @@ class T2Timestep(object):
         if self.plot_grid != []:
             for i in range(nxp):
                 for j in range(nyp):
+                    print i, j, len(self.plot_grid), len(self.plot_grid[0])
                     xpl[i][j] = float(self.plot_grid[i][j][0])
                     ypl[i][j] = float(self.plot_grid[i][j][1])
                     val[i][j] = float(self.plot_grid[i][j][2])

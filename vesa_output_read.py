@@ -58,6 +58,7 @@ if __name__ == '__main__':
     call(["mkdir",sim_title])
 
     hydro_folder = "sl_hydro_700"
+
     hydro_layer_name = "sl_hydro_700"
     vr.plot_wellhead_pressure(cells, time_steps, hydro_folder, hydro_layer_name,\
             fmt = fmt, sleipner = False )

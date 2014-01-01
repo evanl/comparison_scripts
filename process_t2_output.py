@@ -41,11 +41,11 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         sys.exit( "Please specify a simulation title")
     sim_title = sys.argv[1]
-    hydro = False
+    hydro = True
     two_d = False
-    sleipner = False
+    sleipner = True
     section = False
-    shale = True
+    shale = False
     # creates a T2Grid object and a list of T2Timestep objects
     grid, time_steps = process_t2_output(sim_title)
     # choose format for plots.
@@ -59,7 +59,10 @@ if __name__ == '__main__':
         # sleipner
         if sleipner == True:
             eleme = 'JH732'
-            k_layer = 3
+            if shale == True:
+                k_layer = 3
+            elif shale == False:
+                k_layer = 3.
             xind = 32
             yind = 77
             if section == True:

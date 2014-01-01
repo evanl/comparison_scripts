@@ -319,7 +319,7 @@ def make_cross_sections(cells, time_index, axis, index, nx):
 
     return ys, zb, zt, plume
 
-def plot_cross_sections(cells, time_steps, nx, axis = 1, index = 32,\
+def plot_cross_sections(cells, time_steps, nx, axis = 2, index = 32,\
         fmt = 'png'):
     # make a plot of a vertical slice:
     # include top and bottom boundaries
@@ -333,6 +333,7 @@ def plot_cross_sections(cells, time_steps, nx, axis = 1, index = 32,\
             facecolor = 'w', edgecolor = 'k')
         title_string = \
           'Cross section of formation: Axis {0}, Index {1}'.format(axis, index)
+        title_string += ' at time t = {0} days'.format(time_steps[i])
         f.suptitle(title_string)
         ax = f.add_subplot(111)
         ax.set_xlabel('distance [m]')

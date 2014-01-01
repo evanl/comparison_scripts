@@ -162,7 +162,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
                 boundary_type = bc_type, shale = shale)
     else:
         brine_density = 1019.35
-        tg.fill_3d_grid(e_cel, temperature = 32., density = brine_density,\
+        tg.fill_3d_grid(e_cel, temperature = 42., density = brine_density,\
                 two_d = two_d, solubility = solubility,\
                 five_section = fs, shale = shale)
         tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
@@ -206,11 +206,11 @@ if __name__ == '__main__':
     # using density estimates. If a directory is specified, the 
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
+    hydro = False
+    uniform = False
+    two_d = False
     sleipner = True
     shale = False
-    hydro = False
-    uniform = True
-    two_d = False
     # sanity check
     if hydro == True:
         hd = False
@@ -220,14 +220,14 @@ if __name__ == '__main__':
             hd = 'sl_twod_hydro_newidea'
             #hd = 'sl_twod_42_hydro'
         hd = 'unif_15m_hydro'
-        #hd = 'sl_noshale_hydro'
+        hd = 'sl_noshale_42_hydro'
         bc_type = 1
     if uniform == True:
         shale = True
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 1, days_per_step = 120, fs = fs_sec,\
+            num_steps = 1, days_per_step = 15, fs = fs_sec,\
             bc_type = bc_type, column = column, linear_rp = False,\
             linear_cap = False, shale = shale, tolerance = -5)
 

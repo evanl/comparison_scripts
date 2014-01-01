@@ -29,13 +29,13 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     simtime_days = [simtime_years * 365]
 
     # density of C02 [kg/m^3]
-    co2_rho = 675.
+    co2_rho = 348.
     #density of brine [kg/m^3]
     brine_rho = 1020.
     #viscosity of CO2 [Pa s]
-    co2_mu = 0.0000590
+    co2_mu = 2.41e-5
     #viscosity of brine [Pa s ]
-    brine_mu = 0.000690
+    brine_mu = 6.9e-4
     #residual saturation of C02
     sc_res = 0.00
     #residual saturation of brine
@@ -82,7 +82,7 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     wf.write_system( timestep_days, output_days, simtime_years, \
             output_control, layers)
     injs = []
-    injs.append(wf.Injector(wellid, xwell, ywell, ratio, layer_id, simtime_days, \
+    injs.append(wf.Injector(wellid, xwell, ywell, ratio, layer_id, simtime_days,\
             massinflow))
     wf.write_injwells(injs)
     unit.write_layer()
@@ -103,4 +103,3 @@ if __name__ == '__main__':
     vesa_make_input(layer_id, uniform = False, hydro = False,\
             timestep_days = timestep_days, output_days = output_days,\
             simtime_years = simtime_years)
-
