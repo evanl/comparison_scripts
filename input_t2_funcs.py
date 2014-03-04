@@ -318,7 +318,7 @@ def write_solvr(f, linsolve_int, preprocess_int, tolexp = -7):
             '   O0    1.0e-1   1.0e' + tolstr +'\r\n')
     return f
 
-def write_gener(f, eleme, phase = 'brine', mass_rate = .1585, column = False,\
+def write_gener(f, eleme, phase = 'brine', mass_rate = .1585, column_inj = False,\
         kg_inflow = [], times = []):
     """
             So far only writes one constant rate. Need to fix later
@@ -330,15 +330,15 @@ def write_gener(f, eleme, phase = 'brine', mass_rate = .1585, column = False,\
         p = 'COM1 '
 
     if kg_inflow == [] :
-        if column == False:
+        if column_inj == False:
             mr = '{: 10.4f}'.format(mass_rate)
             f.write(eleme + 'inj 1'+ 19 * ' ' + '1' + 5 * ' ' + p  + mr  + '\r\n')
         else:
-            print mass_rate / len(column)
-            mr = '{: 10.4f}'.format(mass_rate / len(column))
-            for i in range(len(column)):
+            print mass_rate / len(column_inj)
+            mr = '{: 10.4f}'.format(mass_rate / len(column_inj))
+            for i in range(len(column_inj)):
                 ir = '{:2d}'.format(i+1)
-                f.write(column[i] + 'inj' + ir + 19 * ' '  +\
+                f.write(column_inj[i] + 'inj' + ir + 19 * ' '  +\
                         '1' + 5 * ' ' + p  + mr  + '\r\n')
     else: 
         if len(kg_inflow) != len(times):
@@ -1039,7 +1039,8 @@ class T2InputGrid(object):
         return 0.5 * h * (b1 + b2)
         
     def write_mesh(self, e_cel, two_d = False, uniform = False,\
-            boundary_type = 1, shale = True):
+            boundary_type = 1, shale = True,\
+            type1_source_cell = 'none'):
         """ populates grid and writes ELEME block of MESH
         """
         g = open('MESH', 'w')
@@ -1065,6 +1066,8 @@ class T2InputGrid(object):
                     if boundary_type == 1 and \
                             (i == 0 or i == (self.nx - self.nx_start - 1 ) or \
                             j == 0 or j == (self.ny - self.ny_start - 1 )):
+                        self.boundary.append(eleme)
+                    elif boundary_type == 1 and type1_source_cell == eleme:
                         self.boundary.append(eleme)
                     else: 
                         vw = format_float_mesh(self.vol[eleme])
@@ -1283,7 +1286,7 @@ class T2InputGrid(object):
         print "INCON COMPLETE"
         return 0 
 
-    def use_old_incon(self, hydro_directory):
+    def use_old_incon(self, hydro_directory, type1_source_cell = 'none'):
         """ note that the hydro_directory does not require the '_dir/' suffix
         """
         print "Writing INCON with SAVE file from: " + hydro_directory
@@ -1295,7 +1298,27 @@ class T2InputGrid(object):
         f = open('INCON','w')
         f.write('INCON -- INITIAL CONDITIONS FOR ' + str(len(self.elements)) + \
             ' ELEMENTS AT TIME  .000000E+00\n')
+        saturate = False
         for line in content:
+            s = line.split()
+            if saturate == True:
+                print "saturating"
+                print line
+                brine_res = format_float_incon(10.2)
+                gas_sat = format_float_incon(10.8)
+                pres = format_float_incon(float(s[0]))
+                temp = format_float_incon(float(s[3]))
+                line = pres + brine_res + gas_sat + temp + '\r\n'
+                print "changed line"
+                print line
+                saturate = False
+            if s != [] and len(s[0]) == 3:
+                s[0] = s[0] + '_' + s[1]
+            if s != [] and type1_source_cell == s[0]:
+                print "found one!"
+                print line
+                print type1_source_cell, s[0]
+                saturate = True
             f.write(line)
         f.close()
         print "INCON from SAVE complete"
@@ -1415,3 +1438,15 @@ class T2InputGrid(object):
         print "Scatter cells slice complete"
         return 0
 
+if __name__ == '__main__':
+    nx = 65
+    ny = 119
+    nz = 43
+    grid = T2InputGrid(nx, ny, nz)
+    for i in range(nx):
+        for j in range(ny):
+            for k in range(nz):
+                char = grid.get_element_chars(i, j, k)
+                if char == 'JH732':
+                    print char, 'JH732'
+                    print i, j, k

@@ -527,8 +527,8 @@ class T2Timestep(object):
                 title_time ])
         plt.savefig(pltstring +\
                  '.'+ fmt, bbox_inches = 0, format = fmt)
-        plt.clf()
         plt.close()
+        plt.clf()
         return 0
 
 def plot_mass_balance(grid, timestepList ):
@@ -582,19 +582,19 @@ def plot_mass_balance(grid, timestepList ):
         time_plot.append(step.step_time/(365 ))
 
     # create total phase curves
-    aqtot = np.asarray(aq_m_tot)
+    aqtot = np.asarray(aq_m_tot) - aq_m_tot[0]
     gastot = np.asarray(gas_m_tot)
     inj = np.asarray(mass_injected)
-    tot = np.asarray(total)
+    tot = np.asarray(total) - total[0]
     t = np.asarray(time_plot)
     f = plt.figure(num=None, figsize=(12,10), dpi=480, facecolor= 'w',\
         edgecolor ='k')
     # f.suptitle("Mass Components")
     ax = f.add_subplot(111)
     ax.plot(t,inj,     label = 'injected')
-    ax.plot(t,aqtot,   label = 'aqueous')
+    ax.plot(t,aqtot,   label = 'delta aqueous')
     ax.plot(t,gastot,  label = 'gaseous')
-    ax.plot(t,tot,     label = 'total')
+    ax.plot(t,tot,     label = 'delta total')
     ax.set_xlabel('time [years]')
     ax.set_ylabel('phase mass [kg]')
     plt.legend(bbox_to_anchor = (0., 1.02, 1., 0.102), loc = 2,
@@ -694,18 +694,18 @@ def plot_planar_contours(grid, time_steps, sim_title, fmt='png',\
         if two_d == True:
             index = 0
             axis = 3
-        # create pressure contours
-        time_steps[i].make_plot_grid(grid, axis = axis, index = index, \
-                valtype = 'pressure')
-        time_steps[i].plot_planar_timestep(grid, axis = axis, index = index, \
-                valtype = 'pressure',\
-                name = sim_title, fmt = fmt, sleipner = sleipner,\
-                section = section, shale = shale)
         # create pressure difference 
         time_steps[i].make_plot_grid(grid, axis = axis, index = index, \
                 valtype = 'delta_p')
         time_steps[i].plot_planar_timestep(grid, axis = axis, index = index,\
                 valtype = 'delta_p',\
+                name = sim_title, fmt = fmt, sleipner = sleipner,\
+                section = section, shale = shale)
+        # create pressure contours
+        time_steps[i].make_plot_grid(grid, axis = axis, index = index, \
+                valtype = 'pressure')
+        time_steps[i].plot_planar_timestep(grid, axis = axis, index = index, \
+                valtype = 'pressure',\
                 name = sim_title, fmt = fmt, sleipner = sleipner,\
                 section = section, shale = shale)
         # create saturation

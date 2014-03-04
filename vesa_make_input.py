@@ -30,11 +30,11 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     simtime_days = [simtime_years * 365]
 
     # density of C02 [kg/m^3]
-    co2_rho = 333.
+    co2_rho = 688.
     #density of brine [kg/m^3]
     brine_rho = 1020.
     #viscosity of CO2 [Pa s]
-    co2_mu = 2.42e-5
+    co2_mu = 5.45e-5
     #viscosity of brine [Pa s ]
     brine_mu = 6.9e-4
     #residual saturation of C02
@@ -49,7 +49,8 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     c_rock = 0.00000000
 
     # capillary pressure stuff: 0 = sharp interface
-    cap_rp_id = 0
+    #                           1 = brooks-corey (exponent match sleipner)
+    cap_rp_id = 1
 
     if uniform == True:
         nx = 25
@@ -78,7 +79,7 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
                 nx, ny, nz = nz, gradient = 10., \
                 homogeneous = homogeneous, permval = 2000.)
         unit.fill_nonuniform_grid(e_cells)
-        #unit.plot_perm_data(e_cells)
+        unit.plot_perm_data(e_cells)
         xwell = 1600.
         ywell = 2057.75
 

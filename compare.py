@@ -48,12 +48,14 @@ class Compare:
         self.sleipner = sleipner
         self.section = section
 
-    def create_blank_figure(self, fontsize = 10, compare_type = 'none'):
+    def create_blank_figure(self, fontsize = 14, compare_type = 'none'):
         self.set_font_size(size = fontsize)
         if compare_type == 'section':
-            self.fig = plt.figure(figsize=(12.0,10.0), dpi=480)
+            self.fig = plt.figure(figsize=(20.0,6.0), dpi=480)
         elif compare_type == 'horizontal':
             self.fig = plt.figure(figsize=(8.0,10.0), dpi=480)
+        elif compare_type == 'plume':
+            self.fig = plt.figure(figsize=(10.0,2.5), dpi=480)
         else:
             self.fig = plt.figure()
         return 0
@@ -64,7 +66,8 @@ class Compare:
         matplotlib.rc('font', **font)
         return 0
 
-    def plot_contour(self, x, y, z, position = 111, label = False,\
+    def plot_contour(self, x, y, z, position = 111, ax_label = False,\
+            contour_label = True, label = 'saturation []',\
             title = 'saturation', xlab = 'x [m]', ylab = 'z [m]'):
         """ takes in numpy arrays of same shape
         """
@@ -75,32 +78,54 @@ class Compare:
             CS = ax_c.contourf(x,y,z,v)
         else:
             CS = ax_c.contourf(x,y,z)
-        cbaxes = self.fig.add_axes([0.8,0.1,0.03,0.8])
-        CB = plt.colorbar(CS, shrink = 1.0, pad=0.02, fraction = 0.07,\
-                extend = 'both', format='%.2f')
-        #if label != False:
-            #CB.set_label(label)
+        if contour_label == True:
+            self.fig.subplots_adjust(right=0.84)
+            cb_axes = self.fig.add_axes([0.85, 0.15, 0.05, 0.7])
+            self.fig.colorbar(CS, cax = cb_axes, format = '%.2f')
+            #CB = plt.colorbar(CS, shrink = 1.0, pad=0.02, fraction = 0.07,\
+                    #extend = 'both', format='%.2f')
+        ax_c.xaxis.set_ticks(np.arange(0,6000,2500))
+        if ax_label != True:
+            ax_c.set_yticklabels([])
+        #ax_c.set_xticklabels([])
 
-        ax_c.set_xlabel(xlab)
-        ax_c.set_ylabel(ylab)
+        #ax_c.set_ylabel(ylab)
+        #ax_c.set_xlabel(xlab)
+        #ax_c.set_aspect('equal')
         ax_c.set_title(title)
         return 0
 
     def plot_graph(self, x, y, position = 111, \
-            title = 'saturation', xlab = 'x [m]', ylab = 'z [m]'):
+            title = 'saturation', xlab = 'x [m]', ylab = 'z [m]',\
+            legend_label = 'y', legend = False,\
+            ax_label = True):
         """ takes in two 1d numpy arrays
         """
         ax_g = self.fig.add_subplot(position)
-        ax_g.plot(x,y )
+        ax_g.plot(x,y, label = legend_label)
         ax_g.set_xlabel(xlab)
         ax_g.set_ylabel(ylab)
         ax_g.set_title(title)
+        ax_g.xaxis.set_ticks(np.arange(0,6000,2500))
+        if ax_label != True:
+            ax_g.set_yticklabels([])
+        #if legend == True:
+            #leg_axes = self.fig.add_axes([0.85,0.15,0.05,0.7])
+            #leg = plt.legend(loc=1)
+            ##ax_g.legend(loc=1)
         return 0
 
     def add_t2_contours(self, sim_index, axis, space_index, valtype,\
             time_indices = [0,1]):
-        pos = 220
+        pos = 130
         for time_index in time_indices:
+            contour_label = False
+            ax_label = False
+            if time_indices.index(time_index) == 0:
+                ax_label = True
+            elif time_indices.index(time_index) == 2:
+                contour_label = True
+            label_str = self.year_index(time_index)
             self.simulations[sim_index].time_steps[time_index].make_plot_grid(\
                     self.simulations[sim_index].grid_cells, \
                     axis, space_index,\
@@ -120,22 +145,31 @@ class Compare:
                 xlab = 'x [m]'
                 ylab = 'z [m]'
             self.plot_contour(x,y,z, position = pos, \
+                    contour_label = contour_label, ax_label = ax_label,\
                     xlab = xlab, ylab = ylab,\
                     title = label_str, label = 'saturation []')
         return 0
 
     def add_vesa_sections(self, sim_index, axis, space_index, nx,\
             time_indices=[0,1]):
-        pos = 222
+        pos = 130
         for time_index in time_indices:
+            legend = False
+            ax_label = False
+            if time_indices.index(time_index) == 0:
+                ax_label = True
+            elif time_indices.index(time_index) == 2:
+                legend = True
             pos +=1
             ys, zb, zt, plume = vr.make_cross_sections(\
                     self.simulations[sim_index].grid_cells, \
                     time_index, axis, space_index, nx)
             title_string = self.year_index(time_index)
-            self.plot_graph(ys, plume, pos)
-            self.plot_graph(ys, zb, pos)
-            self.plot_graph(ys, zt, pos, title = title_string)
+            self.plot_graph(ys, plume, pos, legend_label='CO2 Thickness')
+            self.plot_graph(ys, zb, pos, legend_label='Bottom Shale')
+            self.plot_graph(ys, zt, pos, title = title_string, \
+                    ax_label = ax_label,\
+                    legend_label='Caprock', legend = legend)
         return 0
 
     def add_vesa_contours(self, sim_index, nx, ny, valtype, \
@@ -151,8 +185,9 @@ class Compare:
                     label = valtype)
         return 0
 
-    def create_cross_section_comparison(self, title, time_indices=[0,1]):
-        self.create_blank_figure(compare_type ='section')
+    def create_cross_section_comparison(self, title, sec_type = 'tough',\
+            time_indices=[0,1]):
+        self.create_blank_figure(fontsize = 16, compare_type ='section')
         fmt = 'png'
         nx = 65
         ny = 119
@@ -160,11 +195,14 @@ class Compare:
         y_ind = ny/2
         v_index = 0
         t_index = 1
-        self.add_t2_contours(t_index, 2, x_ind, 'saturation',\
-                time_indices = time_indices)
-        self.add_vesa_sections(v_index, 2, x_ind, nx,\
-                time_indices = time_indices)
-        self.fig.tight_layout()
+        valtype = 'saturation'
+        if sec_type == 'tough':
+            self.add_t2_contours(t_index, 2, x_ind, valtype,\
+                    time_indices = time_indices)
+        elif sec_type == 'vesa':
+            self.add_vesa_sections(v_index, 2, x_ind, nx,\
+                    time_indices = time_indices)
+        #self.fig.tight_layout()
         self.fig.savefig(title + '.' + fmt, bbox_inches='tight',format=fmt)
         self.fig.clf()
         return 0
@@ -187,9 +225,92 @@ class Compare:
         self.fig.clf()
         return 0
 
+    def create_vesa_plume_match(self, title, fmt):
+        pos = 160
+        nx = 65
+        ny = 119
+        self.create_blank_figure(fontsize = 14, compare_type = 'plume')
+        time_indices = [0, 2, 3, 5, 7, 9]
+        sim_index = 0
+        for time_index in time_indices:
+            pos +=1
+            contour_label = False
+            ax_label = False
+            if time_indices.index(time_index) == 0:
+                ax_label = True
+            elif time_indices.index(time_index) == 5:
+                contour_label = True
+            label_str = self.year_index(time_index)
+            x, y, zval = vr.make_plot_grid(\
+                    self.simulations[sim_index].grid_cells, time_index, \
+                    nx, ny, 'saturation')
+            label_str = self.year_index(time_index)
+            self.plot_contour(x, y, zval, position = pos,\
+                    xlab = 'x [m]', ylab = 'y [m]',\
+                    ax_label = ax_label, contour_label = contour_label, \
+                    title = label_str, label = 'saturation []')
+        #self.fig.tight_layout()
+        self.fig.savefig(title + '.' + fmt, bbox_inches='tight',format=fmt)
+        self.fig.clf()
+        return 0
+
+    def create_tough_plume_match(self, title, fmt):
+        pos = 160
+        self.create_blank_figure(fontsize = 14, compare_type = 'plume')
+        time_indices = [0, 2, 3, 5, 7, 9]
+        sim_index = 1
+        axis = 3
+        space_index = 3
+        for time_index in time_indices:
+            pos +=1
+            contour_label = False
+            ax_label = False
+            if time_indices.index(time_index) == 0:
+                ax_label = True
+            elif time_indices.index(time_index) == 5:
+                contour_label = True
+            label_str = self.year_index(time_index)
+            self.simulations[sim_index].time_steps[time_index].make_plot_grid(\
+                    self.simulations[sim_index].grid_cells, \
+                    axis, space_index, 'saturation')
+            x, y, z = self.simulations[sim_index].time_steps[time_index].format_plot_grid(\
+                    self.simulations[sim_index].grid_cells, \
+                    axis, self.sleipner, self.section)
+            label_str = self.year_index(time_index)
+            self.plot_contour(x,y,z, position = pos, \
+                    xlab = 'x [m]', ylab = 'y [m]',\
+                    ax_label = ax_label, contour_label = contour_label, \
+                    title = label_str, label = 'saturation []')
+        #self.fig.tight_layout()
+        self.fig.savefig(title + '.' + fmt, bbox_inches='tight',format=fmt)
+        self.fig.clf()
+        return 0
+
     def year_index(self, time_index):
         yrstring = '{:4d}'.format(int(1999 + time_index))
         return yrstring
+
+    def make_2yr_contours_sections(self, temp):
+        yr_index = [0,2,4,6,8]
+        for i in yr_index:
+            time_indices = [i, i+1]
+            if i == 0:
+                yri = 99
+            else:
+                yri = i-1
+            title = 'sleipner_' + temp + '_section_' + \
+                    str(yr_index.index(i)) + \
+                    '_' + '{:2d}'.format(yri) + '_' + \
+                    '{:2d}'.format(i)
+            self.create_cross_section_comparison(title, \
+                    time_indices = time_indices)
+            contour_title = 'sleipner_' + temp + '_contour_' +\
+                    str(yr_index.index(i)) + \
+                    '_' + '{:2d}'.format(i-1) + '_' + \
+                    '{:2d}'.format(i)
+            self.create_contour_comparison(contour_title, \
+                    time_indices = time_indices)
+        return 0
 
 class Simulation:
     def __init__(self, sim_title, sim_type, grid_cells, time_steps):
@@ -197,7 +318,6 @@ class Simulation:
         self.sim_type = sim_type
         self.grid_cells = grid_cells
         self.time_steps = time_steps
-
 
 if __name__ == '__main__': 
     if len(sys.argv) != 3:
@@ -213,19 +333,16 @@ if __name__ == '__main__':
     section = False
     c = Compare( sim_titles, num_vesa_sims, sleipner, section)
     temp = '32'
-    yr_index = [0,2,4,6,8]
-    for i in yr_index:
-        time_indices = [i, i+1]
-        if i == 0:
-            yri = 99
-        else:
-            yri = i-1
-        title = 'sleipner_' + temp + '_section_' + str(yr_index.index(i)) + \
-                '_' + '{:2d}'.format(yri) + '_' + \
-                '{:2d}'.format(i)
-        c.create_cross_section_comparison(title, time_indices = time_indices)
-        contour_title = 'sleipner_' + temp + '_contour_' +\
-                str(yr_index.index(i)) + \
-                '_' + '{:2d}'.format(i-1) + '_' + \
-                '{:2d}'.format(i)
-        c.create_contour_comparison(contour_title, time_indices = time_indices)
+    sec_type = 'tough'
+    title = 'section_' + temp + '_' + sec_type
+    c.create_cross_section_comparison(title, sec_type = sec_type,\
+            time_indices = [0, 3, 7])
+    sec_type = 'vesa'
+    title = 'section_' + temp + '_' + sec_type
+    c.create_cross_section_comparison(title, sec_type = sec_type,\
+            time_indices = [0, 3, 7])
+    fmt = 'png'
+    #vpl = 't' + temp + '_vesa_plume_bc'
+    #c.create_vesa_plume_match(vpl, fmt)
+    #tpl = 't' + temp + '_tough_plume'
+    #c.create_tough_plume_match(tpl, fmt)

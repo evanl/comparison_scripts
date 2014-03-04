@@ -150,27 +150,37 @@ class Layer(object):
         anis = np.zeros(len(e_cells))
         depth = np.zeros(len(e_cells))
         perm = np.zeros(len(e_cells))
+        poro = np.zeros(len(e_cells))
         for i in range(len(e_cells)):
             cell_ind[i] = i
             perm[i] = e_cells[i].getXPermeability()
             anis[i] = e_cells[i].getZPermeability() / \
                         e_cells[i].getXPermeability()
             depth[i] = e_cells[i].getTopZ()
+            poro[i] = e_cells[i].getPorosity()
+        print "plotting anisotropy ratio"
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111)
         a = ax1.plot(cell_ind, anis)
         ax1.set_xlabel('cell_index []')
         ax1.set_ylabel('anisotropy kz/kx')
         plt.savefig('ec_anis_cells.png')
-        print "plotting anisotropy ratio"
         plt.close()
+        print "plotting permeabilityvsdepth"
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(111)
         b = ax2.scatter(depth, perm)
         ax2.set_xlabel('depth [m]')
         ax2.set_ylabel('permeability [md]')
         plt.savefig('ec_perm_depth.png')
-        print "plotting permeabilityvsdepth"
+        plt.close()
+        print "plotting porosity vsdepth"
+        fig3 = plt.figure()
+        ax3 = fig3.add_subplot(111)
+        b = ax3.scatter(depth, poro)
+        ax3.set_xlabel('depth [m]')
+        ax3.set_ylabel('porosity []')
+        plt.savefig('ec_poro_depth.png')
         plt.close()
 
         return 0
@@ -178,7 +188,7 @@ class Layer(object):
     def fill_nonuniform_grid(self, e_cells):
         print "Filling nonuniform grid" 
         count = 0
-        countcols = 0
+        k = 0
         columnz = []
         columnk = []
         columnphi = []
@@ -186,8 +196,10 @@ class Layer(object):
         check_plane = self.nx*self.ny
         for j in range(self.ny-1,-1,-1):
             for i in range(0,self.nx):
-                for countcols in range(0,self.nz):
-                    ind = (i + self.nx *j) + check_plane*countcols
+                for k in range(0,self.nz):
+                    ind = (i + self.nx *j) + check_plane*k
+                    if i == 32 and j == 77:
+                        print k, e_cells[ind].getZPermeability()
                     if e_cells[ind].getXPermeability() > 1:
                         columnz.append(e_cells[ind].getTopZ())
                         columnk.append(e_cells[ind].getXPermeability())
@@ -258,7 +270,7 @@ class Layer(object):
                 columnz = []
                 columnk = []
                 columnphi = []
-                countcols = 0
+                k = 0
         return 0
 
     def write_layer(self):
@@ -279,13 +291,46 @@ class Layer(object):
         f.write(''.join([str(self.c_co2),'\n']))
         f.write(''.join([str(self.c_bri),'\n']))
         f.write(''.join([str(self.c_roc),'\n']))
-        f.write(''.join([str(self.cap_rp_id),'\n']))
+        if self.cap_rp_id == 0:
+            f.write(''.join([str(self.cap_rp_id),'\n']))
+        elif self.cap_rp_id == 1:
+            lamb = 3.
+            p_entry = 3000000.
+            f.write(''.join([str(self.cap_rp_id), ', ',\
+                    str(lamb), ', ', \
+                    str(p_entry), '\n']))
+            self.plot_cap_rp_bc(lamb, p_entry)
         # number of cells
         f.write(''.join([str(self.nx * self.ny), '\n']))
         for cel in self.grid_cells:
             g.write(''.join([str((cel.top_b - cel.bottom_b)),', ']))
             cel.write_cell(f)
         f.close()
+        return 0
+    def plot_cap_rp_bc(self, lamb, p_entry):
+        sb = np.linspace(self.sb_res,1.)
+        pc = np.zeros(len(sb))
+        krb = np.zeros(len(sb))
+        krc = np.zeros(len(sb))
+        for i in range(len(sb)):
+            seff = (sb[i] - self.sb_res) / (1 - self.sb_res)
+            pc[i] = p_entry * pow(seff, -1/lamb)
+            krb[i] = pow(seff, (2 + 3 * lamb)/lamb)
+            krc[i] = (1 - seff)**2 * (1 - pow(seff, (2 + lamb) / lamb))
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111)
+        ax1.plot(sb, pc)
+        ax1.set_xlabel('sb []')
+        ax1.set_ylabel('pcap [Pa]')
+        plt.savefig('pcap.png')
+        plt.clf()
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(111)
+        ax2.plot(sb, krb, label = 'krb')
+        ax2.plot(sb, krc, label = 'krc')
+        ax2.legend(loc=1)
+        ax2.set_xlabel('sb')
+        plt.savefig('relperm.png')
         return 0
 
 class GridCell(object):

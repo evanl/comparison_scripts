@@ -9,8 +9,9 @@ import input_t2_funcs as it2f
 def create_t2_input(sim_title, two_d = False, uniform = False,\
         sleipner = False, hydro = False, hydro_directory = False,\
         num_steps = 11, days_per_step = 365.25, fs = [],\
-        bc_type = 1, column = False, linear_rp = False,\
-        linear_cap = False, shale = True, tolerance = -7):
+        bc_type = 1, column_inj = False, linear_rp = False,\
+        linear_cap = False, shale = True, tolerance = -7,\
+        type1_source = False):
     print 'CREATING TOUGH2 INPUT FILE'
     if two_d == True:
         eleme = 'aH732'
@@ -22,13 +23,24 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     if uniform == True:
         #eleme = 'cA2 2'
         #eleme = 'dA0 0'
-        eleme = 'yB212'
-        nx = 25
-        ny = 25
-        nz = 25
-        dx = 50
-        dy = 50
-        dz = 0.6
+        box = True
+        if box == True:
+            eleme = 'yB212'
+            nx = 25
+            ny = 25
+            nz = 25
+            dx = 50
+            dy = 50
+            dz = 0.6
+        single_col = False
+        if single_col == True:
+            nx = 1
+            ny = 1
+            nz = 10
+            dx = 10
+            dy = 10
+            dz = 1
+            eleme = 'aA1 1'
     else:
         e_cel, nx, ny, nz = re.read_eclipse()
 
@@ -60,22 +72,23 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
         porosity = 0.35
         xperm = 2.e-12
         yperm = xperm
-        zperm = xperm /3.
+        zperm = xperm 
 
-    if linear_cap == False:
-        cap = 'vanGenuchten'
-    else: 
+    if linear_cap == True:
         cap = 'linear'
+    else: 
+        cap = 'vanGenuchten'
 
-    if linear_rp == False:
-        rel_perm = 'vanGenuchten'
-    else:
+    if linear_rp == True:
         rel_perm = 'linear'
+    else:
+        rel_perm = 'vanGenuchten'
 
     if cap == 'vanGenuchten':
-        cp_vals = [0.4, 0.2, 1.61e-5, 1.e7, 0.999]
+        cp_vals = [0.4, 0.0, 1.61e-5, 1.e7, 0.999]
     else:
-        cp_vals = [5.3e4, 0.2, 1.0]# linear
+        thres_cap = 3.5e3
+        cp_vals = [thres_cap, 0.2, 1.0]# linear
 
     if rel_perm == 'vanGenuchten':
         rp_vals = [0.8, 0.2, 1.0, 0.05]
@@ -127,9 +140,15 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     kg_per_sec_factor = 31.71 # kg/s per mt/yr
     kgInflow = [ x * kg_per_sec_factor for x in massinflow]
 
-    it2f.write_gener(f, eleme, phase = phase, mass_rate = mass_rate, \
-            column = column)
-            #, kg_inflow = kgInflow, times = output_day_list )
+    if type1_source == True:
+        type1_source_cell = eleme
+        it2f.write_gener(f, eleme, phase = phase, mass_rate = 0.0, \
+                column_inj = column_inj)
+    else:
+        type1_source_cell = 'none'
+        it2f.write_gener(f, eleme, phase = phase, mass_rate = mass_rate, \
+                column_inj = column_inj)
+                #, kg_inflow = kgInflow, times = output_day_list )
 
     it2f.write_times(f, output_day_list)
     it2f.write_foft(f)
@@ -159,20 +178,23 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
                 altered_cell = altered_cell)
         e_cel = 'uniform'
         tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
-                boundary_type = bc_type, shale = shale)
+                boundary_type = bc_type, shale = shale,\
+                type1_source_cell = type1_source_cell)
     else:
         brine_density = 1019.35
-        tg.fill_3d_grid(e_cel, temperature = 42., density = brine_density,\
+        tg.fill_3d_grid(e_cel, temperature = 32., density = brine_density,\
                 two_d = two_d, solubility = solubility,\
                 five_section = fs, shale = shale)
         tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
-                boundary_type = bc_type, shale = shale)
+                boundary_type = bc_type, shale = shale,\
+                type1_source_cell = type1_source_cell)
 
 
     if hydro_directory == False:
         tg.write_incon(porosity)
     else:
-        tg.use_old_incon(hydro_directory)
+        tg.use_old_incon(hydro_directory, \
+                type1_source_cell = type1_source_cell)
 
     print "Write Time"
     print clock() - t_read
@@ -189,10 +211,10 @@ if __name__ == '__main__':
     # if column is not needed, just make it false
     endstr = 'B212'
     letters = string.lowercase
-    column = []
+    column_inj = []
     for i in range(25):
-        column.append(letters[i] + endstr)
-    column = False
+        column_inj.append(letters[i] + endstr)
+    column_inj = False
 
     # start ijk values for the section of sleipner data
     i_start = 15
@@ -207,27 +229,31 @@ if __name__ == '__main__':
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
     hydro = False
-    uniform = False
+    uniform = True
     two_d = False
-    sleipner = True
-    shale = False
+    sleipner = False
+    shale = True
+    linear_rp = True
+    linear_cap = False
+    type1_source = True
     # sanity check
     if hydro == True:
         hd = False
         bc_type = 2
     else:
+        hd = 'u25_hydro'
+        #hd = 'sl_noshale_hydro'
         if two_d == True:
-            hd = 'sl_twod_hydro_newidea'
-            #hd = 'sl_twod_42_hydro'
-        hd = 'unif_15m_hydro'
-        hd = 'sl_noshale_42_hydro'
+            #hd = 'sl_twod_hydro_newidea'
+            #hd = 'sl_twod_hydro'
+            hd = 'sl_twod_hydro_32'
         bc_type = 1
     if uniform == True:
         shale = True
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 1, days_per_step = 15, fs = fs_sec,\
-            bc_type = bc_type, column = column, linear_rp = False,\
-            linear_cap = False, shale = shale, tolerance = -5)
-
+            num_steps = 24, days_per_step = 15, fs = fs_sec,\
+            bc_type = bc_type, column_inj = column_inj, linear_rp = linear_rp,\
+            linear_cap = linear_cap, shale = shale, tolerance = -5,\
+            type1_source = type1_source)
