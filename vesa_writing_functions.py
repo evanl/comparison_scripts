@@ -307,6 +307,8 @@ class Layer(object):
             cel.write_cell(f)
         f.close()
         return 0
+    def bc_cap(self, pentry, lamb):
+        return pcap
     def plot_cap_rp_bc(self, lamb, p_entry):
         sb = np.linspace(self.sb_res,1.)
         pc = np.zeros(len(sb))

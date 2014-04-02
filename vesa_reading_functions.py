@@ -301,15 +301,25 @@ def make_cross_sections(cells, time_index, axis, index, nx):
     y_list = []
     tempsat = []
     counter = 0
-    for cel in cells:
-        if (counter % nx ) == 0:
-            y_list.append(cel.get_y())
-            counter = 0
-        if counter == index:
-            plume.append(cel.get_item_list('thickness')[time_index])
-            top.append(cel.get_z_top())
-            bot.append(cel.get_z_bot())
-        counter +=1 
+    if axis == 1:
+        for cel in cells:
+            if (counter % nx ) == 0:
+                y_list.append(cel.get_y())
+                counter = 0
+            if counter == index:
+                plume.append(cel.get_item_list('thickness')[time_index])
+                top.append(cel.get_z_top())
+                bot.append(cel.get_z_bot())
+            counter +=1 
+    elif axis == 0:
+        for cel in cells:
+            if counter / nx == 0:
+                y_list.append(cel.get_x())
+            if counter / nx == index:
+                plume.append(cel.get_item_list('thickness')[time_index])
+                top.append(cel.get_z_top())
+                bot.append(cel.get_z_bot())
+            counter +=1
 
     zb = np.asarray(bot)
     zt = np.asarray(top)
@@ -350,6 +360,7 @@ def plot_cross_sections(cells, time_steps, nx, axis = 2, index = 32,\
         p2 = plt.plot(ys, zt, label = "Top Boundary")
         plt.legend(loc=4)
         sect_str = '{:02d}'.format(i+1)
-        f.savefig('cross_section' + sect_str + '.' + fmt)
+        f.savefig('cross_section_' + str(axis) + '_' + str(index) + '_' \
+                + sect_str + '.' + fmt)
         plt.close()
     return 0

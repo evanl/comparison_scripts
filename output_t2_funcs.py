@@ -226,7 +226,7 @@ class T2Timestep(object):
             return 1
         return v
 
-    def readOutput(self, fopen, grid):
+    def readOutput(self, fopen, grid, parallel = False):
         """
         reads through the already opened t2run.out file until it finds the 
         next block of output data. 
@@ -261,12 +261,10 @@ class T2Timestep(object):
         # reads blank lines or skips them until the end of the output block
         # signified by the line of '@' symbols
         while s == [] or line[1] != '@':
-
             # skips the lines that are blank
             if s == []:
                 line = f.readline()
                 s = line.split()
-
             # if a line contains the element header:
             # ELEM. INDEX   P      T       SG ...
             #             (Pa)   (deg.C)      ...
@@ -276,10 +274,20 @@ class T2Timestep(object):
                     line = f.readline()
                 s = line.split()
 
+
             # reads a subblock of output data that looks like:
             #  aJ3 1  25 0.83487E+07  32.00 ...
             #  aJ2 1  26 0.83584E+07  32.00 ...
-            while s != [] and line [1] != '@':
+            while s != [] and line [1] != '@' :
+                # if a line contains the element header:
+                # ELEM. INDEX   P      T       SG ...
+                #             (Pa)   (deg.C)      ...
+                # then this block skips it
+                if s[0] == 'ELEM.':
+                    for i in range(2):
+                        line = f.readline()
+                    s = line.split()
+
 
                 # if the cell is not a dummy boundary cell
                 # adds the element and its values to the dictionaries
@@ -314,52 +322,54 @@ class T2Timestep(object):
                     self.rho_gas[eleme] = float(s[11])
                 line = f.readline()
                 s = line.split()
+                print s
             # end while for reading sub-block
         # end while for reading full output block
         # the current line is the '@@@@@@@@' line 
         # from the end of the output block
 
-        # for a single cell injection rate:
-        while s == [] or s[0] != 'ELEMENT':
-            line = f.readline()
-            s = line.split()
+        if parallel == False:
+            # for a single cell injection rate:
+            while s == [] or s[0] != 'ELEMENT':
+                line = f.readline()
+                s = line.split()
 
-        # once the line is element 
-        for i in range(3):
-            line = f.readline()
-            s = line.split()
-        if len(s[0]) == 3:
-            self.rate = float(s[5])
-        else: 
-            self.rate = float(s[4])
-        # calculates injected mass up until that point 
-        # NOTE: 
-        # FOR CONSTANT RATE ONLY. 
-        self.mass_injected = self.rate * self.step_time * 24. * 3600.
+            # once the line is element 
+            for i in range(3):
+                line = f.readline()
+                s = line.split()
+            if len(s[0]) == 3:
+                self.rate = float(s[5])
+            else: 
+                self.rate = float(s[4])
+            # calculates injected mass up until that point 
+            # NOTE: 
+            # FOR CONSTANT RATE ONLY. 
+            self.mass_injected = self.rate * self.step_time * 24. * 3600.
 
-        # read through lines until 'VOL.' is hit, get 
-        # initial mass balances for each phase
-        # VOL. (m^3) * 0.00000000E+00 0.62971493E+07 0.00000000E+00 \
-        # GAS PHASE  * 0.16497908E+06 0.00000000E+00 0.11330593E+09 0.65583271E+14
-        while s == [] or s[0]!= 'VOL.':
+            # read through lines until 'VOL.' is hit, get 
+            # initial mass balances for each phase
+            # VOL. (m^3) * 0.00000000E+00 0.62971493E+07 0.00000000E+00 \
+            # GAS PHASE  * 0.16497908E+06 0.00000000E+00 0.11330593E+09 0.65583271E+14
+            while s == [] or s[0]!= 'VOL.':
+                line = f.readline()
+                s = line.split()
+            self.gas_mass_water = float(s[9])
+            self.gas_mass_nacl =  float(s[10])
+            self.gas_mass_co2 =   float(s[11])
+            
+            # PHASES     *      GAS          AQUEOUS        SOLID       \
+            # COMPONENTS *     WATER          SALT             CO2           HEAT
+            #reads one line to get to masses and aqueous phase
+            # MASS (kg)  * 0.00000000E+00 0.64182984E+10 0.00000000E+00 \
+            # AQUEOUS    * 0.62100916E+10
             line = f.readline()
             s = line.split()
-        self.gas_mass_water = float(s[9])
-        self.gas_mass_nacl =  float(s[10])
-        self.gas_mass_co2 =   float(s[11])
-        
-        # PHASES     *      GAS          AQUEOUS        SOLID       \
-        # COMPONENTS *     WATER          SALT             CO2           HEAT
-        #reads one line to get to masses and aqueous phase
-        # MASS (kg)  * 0.00000000E+00 0.64182984E+10 0.00000000E+00 \
-        # AQUEOUS    * 0.62100916E+10
-        line = f.readline()
-        s = line.split()
-        self.gas_mass_total = float(s[3])
-        self.aq_mass_total =float(s[4])
-        self.aq_mass_water =float(s[8])
-        self.aq_mass_nacl = float(s[9])
-        self.aq_mass_co2 =  float(s[10])
+            self.gas_mass_total = float(s[3])
+            self.aq_mass_total =float(s[4])
+            self.aq_mass_water =float(s[8])
+            self.aq_mass_nacl = float(s[9])
+            self.aq_mass_co2 =  float(s[10])
 
         return f
 

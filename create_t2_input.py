@@ -58,7 +58,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
 
     print 'Creating T2 input files for simulation: ' + sim_title
     f = open(sim_title,'w')
-    f.write('*'+ sim_title +'* test, 2d-case\n')
+    f.write('*'+ sim_title +'* test\n')
 
     #input parameters
     name = 'sands'
@@ -87,7 +87,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     if cap == 'vanGenuchten':
         cp_vals = [0.4, 0.0, 1.61e-5, 1.e7, 0.999]
     else:
-        thres_cap = 3.5e3
+        thres_cap = 7.0e3
         cp_vals = [thres_cap, 0.2, 1.0]# linear
 
     if rel_perm == 'vanGenuchten':
@@ -229,20 +229,20 @@ if __name__ == '__main__':
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
     hydro = False
-    uniform = True
+    uniform = False
     two_d = False
-    sleipner = False
-    shale = True
-    linear_rp = True
+    sleipner = True
+    shale = False
+    linear_rp = False
     linear_cap = False
-    type1_source = True
+    type1_source = False
     # sanity check
     if hydro == True:
         hd = False
         bc_type = 2
     else:
-        hd = 'u25_hydro'
-        #hd = 'sl_noshale_hydro'
+        #hd = 'u25_hydro'
+        hd = 'sl_noshale_hydro'
         if two_d == True:
             #hd = 'sl_twod_hydro_newidea'
             #hd = 'sl_twod_hydro'
@@ -253,7 +253,7 @@ if __name__ == '__main__':
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 24, days_per_step = 15, fs = fs_sec,\
+            num_steps = 11, days_per_step = 365.25, fs = fs_sec,\
             bc_type = bc_type, column_inj = column_inj, linear_rp = linear_rp,\
             linear_cap = linear_cap, shale = shale, tolerance = -5,\
             type1_source = type1_source)

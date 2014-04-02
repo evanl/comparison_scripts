@@ -47,6 +47,8 @@ if __name__ == '__main__':
         ny = 119
     vr.plot_cross_sections(cells, time_steps, nx, axis = 1, index = nx/2, \
             fmt = 'png', yearwise = yearwise)
+    vr.plot_cross_sections(cells, time_steps, nx, axis = 0, index = ny/3 + 2, \
+            fmt = 'png', yearwise = yearwise)
     vr.mass_balance_read_print()
     vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
             valtype="saturation", fmt = fmt, yearwise = yearwise)

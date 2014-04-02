@@ -1,6 +1,7 @@
 #Author - Evan Leister
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 from mpl_toolkits.mplot3d import Axes3D
 import string
 def write_separator(f, keyword):
@@ -128,7 +129,7 @@ def plot_relperm_cap(rp_vals, cp_vals, fmt = 'png',\
             pcap[i] = cap_linear(sat[i], cp_vals)
     else:
         for i in range(len(sat)):
-            pcap[i] = cap_vangenuchten(sat[i], cp_vals)
+            pcap[i] = -cap_vangenuchten(sat[i], cp_vals)
     if rp == 'linear':
         for i in range(len(sat)):
             krl[i], krg[i] = rel_perms_linear(sat[i], rp_vals)
@@ -136,11 +137,13 @@ def plot_relperm_cap(rp_vals, cp_vals, fmt = 'png',\
         for i in range(len(sat)):
             krl[i], krg[i] = rel_perms_vangenuchten(sat[i], rp_vals)
 
+    font = { 'size'   : 14}
+    matplotlib.rc('font', **font)
     f = plt.figure(num=None , dpi = 480, \
         facecolor = 'w', edgecolor = 'k')
     f.suptitle('Capillary Pressure Curve')
     ax = f.add_subplot(111)
-    ax.set_xlabel('S_l []')
+    ax.set_xlabel('S_w []')
     ax.set_ylabel('Pressure [Pa]')
     p = plt.plot(sat, pcap)
     f.savefig('capillary_pressure' + '.' + fmt)
@@ -151,7 +154,7 @@ def plot_relperm_cap(rp_vals, cp_vals, fmt = 'png',\
         facecolor = 'w', edgecolor = 'k')
     g.suptitle('Relative Permeability Curves')
     ax = g.add_subplot(111)
-    ax.set_xlabel('S_l []')
+    ax.set_xlabel('S_w []')
     ax.set_ylabel('Relative Permeability []')
     p = plt.plot(sat, krl, label = 'liquid')
     p = plt.plot(sat, krg, label = 'gas')

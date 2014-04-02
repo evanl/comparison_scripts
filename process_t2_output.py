@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import output_t2_funcs as t2o
 
-def process_t2_output(sim_title ):
+def process_t2_output(sim_title, parallel = False, par_sim_ending = 'n2'):
     # this must be changed to reflect the input data
     # create an output grid object
     grid = t2o.T2grid()
@@ -13,7 +13,12 @@ def process_t2_output(sim_title ):
     grid.read_mesh()
     # count the number of outputs
     num_outputs = 0 
+    #if parallel == True:
+        #f = open('OUTPUT_DATA_'+ par_sim_ending)
+    #else:
+        #f = open(sim_title + '.out')
     f = open(sim_title + '.out')
+
     a = f.read()
     b = a.split()
     for char in b:
@@ -24,12 +29,13 @@ def process_t2_output(sim_title ):
 
     # read the file for the timestep data
     f = open(sim_title + '.out')
-    grid.read_initial_mass(f)
+    if parallel == False:
+        grid.read_initial_mass(f)
 
     time_steps = []
     for i in range(num_outputs):
         timetest = t2o.T2Timestep()
-        timetest.readOutput(f, grid)
+        timetest.readOutput(f, grid, parallel = parallel)
         timetest.get_co2_density_viscosity()
         time_steps.append(timetest)
     f.close()
@@ -43,11 +49,12 @@ if __name__ == '__main__':
     sim_title = sys.argv[1]
     hydro = False
     two_d = False
-    sleipner = False
+    sleipner = True
     section = False
-    shale = True
+    shale = False
+    parallel = True
     # creates a T2Grid object and a list of T2Timestep objects
-    grid, time_steps = process_t2_output(sim_title)
+    grid, time_steps = process_t2_output(sim_title, parallel)
     # choose format for plots.
     fmt = 'png'
     if two_d == True:
@@ -96,7 +103,8 @@ if __name__ == '__main__':
         t2o.plot_incon_change_vs_index(grid, time_steps, vs_elev = True)
         t2o.check_3d_hydro_pressure(grid, time_steps)
 
-    t2o.plot_mass_balance(grid, time_steps)
+    if parallel == False:
+        t2o.plot_mass_balance(grid, time_steps)
 
     t2o.write_viscosity(grid, time_steps)
 
