@@ -36,18 +36,24 @@ if __name__ == '__main__':
     cells, time_steps = vr.read_output_data(layer = layer)
     t_read = clock()
 
-    uniform = False
-    sleipner = True
-    yearwise = True
+    uniform = True
+    sleipner = False
+    yearwise = False
     if uniform == True:
         nx = 25
         ny = 25
+        xcross_ind = ny/2
+        hydro_folder = 'u25_hydro'
+        hydro_layer_name = 'u25_hydro'
     else:
         nx = 65
         ny = 119
+        xcross_ind = ny/3 + 2
+        hydro_folder = "sl_hydro_700"
+        hydro_layer_name = "sl_hydro_700"
     vr.plot_cross_sections(cells, time_steps, nx, axis = 1, index = nx/2, \
             fmt = 'png', yearwise = yearwise)
-    vr.plot_cross_sections(cells, time_steps, nx, axis = 0, index = ny/3 + 2, \
+    vr.plot_cross_sections(cells, time_steps, nx, axis = 0, index= xcross_ind,\
             fmt = 'png', yearwise = yearwise)
     vr.mass_balance_read_print()
     vr.plot_vesa_timesteps(cells, time_steps, nx, ny, \
@@ -60,11 +66,8 @@ if __name__ == '__main__':
     print "Creating directory: " + sim_title 
     call(["mkdir",sim_title])
 
-    hydro_folder = "sl_hydro_700"
-
-    hydro_layer_name = "sl_hydro_700"
-    vr.plot_wellhead_pressure(cells, time_steps, hydro_folder, hydro_layer_name,\
-            fmt = fmt, sleipner = False )
+    #vr.plot_wellhead_pressure(cells, time_steps, hydro_folder, hydro_layer_name,\
+            #fmt = fmt, sleipner = False )
 
     move_files(fmt, sim_title)
     print "total time processing vesa"

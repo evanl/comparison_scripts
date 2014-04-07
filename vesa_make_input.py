@@ -23,18 +23,22 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
                   #0.1390, 0.1830, 0.2370, 0.2960, 0.370]]
     massinflow = [0.1418]
     if uniform == True:
-        massinflow = [0.1]
+        massinflow = [0.031536]
+        # matches with 1 kg/sec
     if hydro == True:
         massinflow = [0.]
 
-    simtime_days = [simtime_years * 365]
+    simtime_days = [simtime_years * 365.25]
 
     # density of C02 [kg/m^3]
-    co2_rho = 688.
+    #co2_rho = 688.
+    co2_rho = 706.
     #density of brine [kg/m^3]
-    brine_rho = 1020.
+    #brine_rho = 1020.
+    brine_rho = 1016.
     #viscosity of CO2 [Pa s]
-    co2_mu = 5.45e-5
+    #co2_mu = 5.45e-5
+    co2_mu = 5.767e-5
     #viscosity of brine [Pa s ]
     brine_mu = 6.9e-4
     #residual saturation of C02
@@ -42,15 +46,15 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     #residual saturation of brine
     sb_res = 0.2
     # compressibility of CO2 [1/Pa]
-    c_co2 = 0.00000000
+    c_co2 = 1.e-8
     #compressibility of brine
-    c_brine = 0.00000000
+    c_brine = 5.e-10
     # compressibility of rock
-    c_rock = 0.00000000
+    c_rock = 1.e-10
 
     # capillary pressure stuff: 0 = sharp interface
     #                           1 = brooks-corey (exponent match sleipner)
-    cap_rp_id = 1
+    cap_rp_id = 0
 
     if uniform == True:
         nx = 25
@@ -59,9 +63,9 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
         dx = 50.
         dy = 50.
         dz = 15.
-        center_depth = 862.
+        center_depth = 867.
         phi = 0.35
-        k = 200
+        k = 2000.
         unit = wf.Layer(layers[0], l_type, layer_id, co2_rho, brine_rho, co2_mu,\
                 brine_mu, sc_res, sb_res, c_co2, c_brine, c_rock, cap_rp_id,\
                 nx, ny, nz = nz, gradient = 10. )
@@ -101,12 +105,12 @@ if __name__ == '__main__':
         print "Please run vesa_make_input in the following way: \n"
         print "$ python vesa_make_input.py <layer_id/simtitle>"
     layer_id = sys.argv[1]
-    timestep_days = 0.5
-    output_days = 365.
-    simtime_years = 11
-    uniform = False
+    timestep_days = 0.25
+    output_days = 15.
+    simtime_years = 1.
+    uniform = True
     hydro = False
     homogeneous = True
-    vesa_make_input(layer_id, uniform = hydro, hydro = hydro,\
+    vesa_make_input(layer_id, uniform = uniform, hydro = hydro,\
             timestep_days = timestep_days, output_days = output_days,\
             simtime_years = simtime_years, homogeneous = homogeneous)

@@ -322,7 +322,6 @@ class T2Timestep(object):
                     self.rho_gas[eleme] = float(s[11])
                 line = f.readline()
                 s = line.split()
-                print s
             # end while for reading sub-block
         # end while for reading full output block
         # the current line is the '@@@@@@@@' line 

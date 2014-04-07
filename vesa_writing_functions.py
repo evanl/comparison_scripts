@@ -16,19 +16,9 @@ class Injector(object):
         if len(mass_rate) != len(end_intervals):
             print "Mass inflow and interval ends must match"
             return 1
-    def get_x(self):
-        return self.x
-    def get_y(self):
-        return y
-    def get_ratio(self):
-        return ratio
-    def get_layer_id(self):
-        return layer_id
-    def get_end_intervals(self):
-        return get_end_intervals
-    def get_mass_rate(self):
-        return mass_rate
     def write_injector(self, f):
+        print "mass rate is"
+        print self.mass_rate
         f.write(', '.join([str(self.index), str(self.x), str(self.y),\
                 str(self.ratio), str(self.layer_id),\
                 str(self.radius), str(len(self.mass_rate))]))

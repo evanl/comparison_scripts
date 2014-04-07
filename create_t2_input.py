@@ -11,7 +11,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
         num_steps = 11, days_per_step = 365.25, fs = [],\
         bc_type = 1, column_inj = False, linear_rp = False,\
         linear_cap = False, shale = True, tolerance = -7,\
-        type1_source = False):
+        type1_source = False, sat_frac = 0.8):
     print 'CREATING TOUGH2 INPUT FILE'
     if two_d == True:
         eleme = 'aH732'
@@ -76,6 +76,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
 
     if linear_cap == True:
         cap = 'linear'
+        cap = 'none'
     else: 
         cap = 'vanGenuchten'
 
@@ -85,9 +86,11 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
         rel_perm = 'vanGenuchten'
 
     if cap == 'vanGenuchten':
-        cp_vals = [0.4, 0.0, 1.61e-5, 1.e7, 0.999]
+        cp_vals = [0.4, 0.0, 1.61e-3, 1.e7, 0.999]
+    elif cap == 'none':
+        cp_vals = []
     else:
-        thres_cap = 7.0e3
+        thres_cap = 1.e-7
         cp_vals = [thres_cap, 0.2, 1.0]# linear
 
     if rel_perm == 'vanGenuchten':
@@ -102,6 +105,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     it2f.write_rocks(f, name, sand_density, porosity, xperm, yperm, zperm, \
         cp_vals, rp_vals, thermk = 2.51, specheat = 920., \
         cap = cap, rel_perm = rel_perm)
+    # SHALE STUFFFFFFFFFFF
     name = 'shale'
     shale_density = 2600.
     porosity = 0.35
@@ -109,7 +113,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     yperm = 1.e-18
     zperm = 1.e-18
     it2f.write_rocks(f, name, shale_density, porosity, xperm, yperm, zperm, \
-        rp_vals, cp_vals, thermk = 2.51, specheat = 920., \
+        cp_vals, rp_vals, thermk = 2.51, specheat = 920., \
         cap = cap, rel_perm = rel_perm,\
         end = True)
 
@@ -167,7 +171,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     tg = it2f.T2InputGrid(nx, ny, nz)
 
     solubility = 0.454104e-3
-    #solubility = 0.0
+    solubility = 0.0
 
     if uniform == True:
         brine_density = 1016.4
@@ -193,8 +197,8 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     if hydro_directory == False:
         tg.write_incon(porosity)
     else:
-        tg.use_old_incon(hydro_directory, \
-                type1_source_cell = type1_source_cell)
+        tg.use_old_incon(hydro_directory,type1_source_cell = type1_source_cell,\
+                saturation_fraction = sat_frac)
 
     print "Write Time"
     print clock() - t_read
@@ -229,22 +233,23 @@ if __name__ == '__main__':
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
     hydro = False
-    uniform = False
+    uniform = True
     two_d = False
-    sleipner = True
-    shale = False
+    sleipner = False
+    shale = True
     linear_rp = False
-    linear_cap = False
-    type1_source = False
+    no_cap = False
+    type1_source = True
+    sat_frac = 0.4
     # sanity check
     if hydro == True:
         hd = False
         bc_type = 2
     else:
-        #hd = 'u25_hydro'
-        hd = 'sl_noshale_hydro'
+        hd = 'u25_hydro'
+        #hd = 'u25_hydro_no_dissolution'
+        #hd = 'sl_noshale_hydro'
         if two_d == True:
-            #hd = 'sl_twod_hydro_newidea'
             #hd = 'sl_twod_hydro'
             hd = 'sl_twod_hydro_32'
         bc_type = 1
@@ -253,7 +258,7 @@ if __name__ == '__main__':
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 11, days_per_step = 365.25, fs = fs_sec,\
+            num_steps = 24, days_per_step = 15., fs = fs_sec,\
             bc_type = bc_type, column_inj = column_inj, linear_rp = linear_rp,\
-            linear_cap = linear_cap, shale = shale, tolerance = -5,\
-            type1_source = type1_source)
+            linear_cap = no_cap, shale = shale, tolerance = -5,\
+            type1_source = type1_source, sat_frac = sat_frac)

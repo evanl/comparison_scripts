@@ -84,6 +84,8 @@ def write_rocks(f, name, density, porosity, xperm, yperm, zperm, \
     # Capillary pressure
     if cap == 'vanGenuchten':
         cp_type = 7
+    elif cap == 'none':
+        cp_type = 8
     else:
         cp_type = 1
 
@@ -127,6 +129,9 @@ def plot_relperm_cap(rp_vals, cp_vals, fmt = 'png',\
     if cp == 'linear':
         for i in range(len(sat)):
             pcap[i] = cap_linear(sat[i], cp_vals)
+    elif cp == 'none':
+        for i in range(len(sat)):
+            pcap[i] = 0.
     else:
         for i in range(len(sat)):
             pcap[i] = -cap_vangenuchten(sat[i], cp_vals)
@@ -1289,7 +1294,8 @@ class T2InputGrid(object):
         print "INCON COMPLETE"
         return 0 
 
-    def use_old_incon(self, hydro_directory, type1_source_cell = 'none'):
+    def use_old_incon(self, hydro_directory, type1_source_cell = 'none',\
+            saturation_fraction= 0.8):
         """ note that the hydro_directory does not require the '_dir/' suffix
         """
         print "Writing INCON with SAVE file from: " + hydro_directory
@@ -1307,8 +1313,10 @@ class T2InputGrid(object):
             if saturate == True:
                 print "saturating"
                 print line
-                brine_res = format_float_incon(10.2)
-                gas_sat = format_float_incon(10.8)
+                gas_sat = 10 +  saturation_fraction
+                brine_sat = 0.1 *(1. - saturation_fraction)
+                brine_res = format_float_incon(brine_sat)
+                gas_sat = format_float_incon(gas_sat)
                 pres = format_float_incon(float(s[0]))
                 temp = format_float_incon(float(s[3]))
                 line = pres + brine_res + gas_sat + temp + '\r\n'

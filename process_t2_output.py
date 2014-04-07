@@ -49,10 +49,10 @@ if __name__ == '__main__':
     sim_title = sys.argv[1]
     hydro = False
     two_d = False
-    sleipner = True
+    sleipner = False
     section = False
-    shale = False
-    parallel = True
+    shale = True
+    parallel = False
     # creates a T2Grid object and a list of T2Timestep objects
     grid, time_steps = process_t2_output(sim_title, parallel)
     # choose format for plots.
