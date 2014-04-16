@@ -7,7 +7,7 @@ import sys
 
 def vesa_make_input(layer_id, uniform = False, hydro = False,\
         timestep_days = 1., output_days = 365, simtime_years = 11,\
-        homogeneous = False):
+        homogeneous = False, xlocs = [1600.0], ylocs = [2057.75]):
     """  
     """
     print "creating input files"
@@ -33,12 +33,14 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     # density of C02 [kg/m^3]
     #co2_rho = 688.
     co2_rho = 706.
+    #co2_rho = 465.
     #density of brine [kg/m^3]
     #brine_rho = 1020.
     brine_rho = 1016.
     #viscosity of CO2 [Pa s]
     #co2_mu = 5.45e-5
     co2_mu = 5.767e-5
+    #co2_mu = 3.35e-5
     #viscosity of brine [Pa s ]
     brine_mu = 6.9e-4
     #residual saturation of C02
@@ -84,8 +86,8 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
                 homogeneous = homogeneous, permval = 2000.)
         unit.fill_nonuniform_grid(e_cells)
         unit.plot_perm_data(e_cells)
-        xwell = 1600.
-        ywell = 2057.75
+        xwell = xlocs[10]
+        ywell = ylocs[10]
 
     wf.write_system( timestep_days, output_days, simtime_years, \
             output_control, layers)
@@ -106,11 +108,17 @@ if __name__ == '__main__':
         print "$ python vesa_make_input.py <layer_id/simtitle>"
     layer_id = sys.argv[1]
     timestep_days = 0.25
-    output_days = 15.
-    simtime_years = 1.
-    uniform = True
+    output_days = 365.25
+    simtime_years = 11.
+    uniform = False
     hydro = False
     homogeneous = True
+    xlocs = [1600.0, 1649.234375, 1698.453125, 1747.6875, 1796.921875,\
+            1846.15625, 1895.390625, 1944.609375, 1993.84375, 2043.078125,\
+            2092.3125]
+    ylocs = [2057.75, 2107.25, 2156.75, 2206.25, 2255.75,\
+            2305.5, 2355.25, 2404.75, 2454.25, 2503.75, 2553.25]
     vesa_make_input(layer_id, uniform = uniform, hydro = hydro,\
             timestep_days = timestep_days, output_days = output_days,\
-            simtime_years = simtime_years, homogeneous = homogeneous)
+            simtime_years = simtime_years, homogeneous = homogeneous,\
+            xlocs = xlocs, ylocs = ylocs)

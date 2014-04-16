@@ -146,9 +146,8 @@ class T2grid(object):
             self.k[el] = k_map[kl]
         return 0
 
-    def read_initial_mass(self, fopen):
+    def read_initial_mass(self, f):
         print "Reading Initial Mass"
-        f = fopen
         line = f.readline()
         s = line.split()
         
@@ -158,16 +157,25 @@ class T2grid(object):
         while s == [] or s[0]!= 'VOL.':
             line = f.readline()
             s = line.split()
+        self.gas_mass_water = float(s[9])
+        self.gas_mass_nacl =  float(s[10])
+        self.gas_mass_co2 =   float(s[11])
         
         #reads one line to get to masses and aqueous phase
         # MASS (kg)  * 0.00000000E+00 0.64182984E+10 0.00000000E+00 \
         # AQUEOUS    * 0.62100916E+10
         line = f.readline()
         s = line.split()
+        self.gas_mass_total = float(s[3])
         self.aq_mass_total =float(s[4])
         self.aq_mass_water =float(s[8])
         self.aq_mass_nacl = float(s[9])
         self.aq_mass_co2 =  float(s[10])
+        # Makes sure to not double read sand/system balances
+        while s == [] or s[0]!= 'VOL.':
+            line = f.readline()
+            s = line.split()
+        return "gas mass" + str(self.gas_mass_total )
         return f
 
 class T2Timestep(object):
@@ -226,14 +234,14 @@ class T2Timestep(object):
             return 1
         return v
 
-    def readOutput(self, fopen, grid, parallel = False):
+    def readOutput(self, f, g, grid, parallel = False, year_add = 0.):
         """
         reads through the already opened t2run.out file until it finds the 
         next block of output data. 
         Populates the pressure, saturation, density and time values for the 
         timestep
         """
-        f = fopen
+        print "reading timestep"
         line = f.readline()
         s = line.split()
 
@@ -244,7 +252,10 @@ class T2Timestep(object):
 
         # when the line with OUTPUT is encountered, the time is read
         # from that same line
-        self.step_time = float(s[-2])
+        days_added = year_add * 365.25 
+        self.step_time = float(s[-2]) + days_added
+        print "step time, year_add"
+        print self.step_time, year_add
         
         # reads through the block that looks like the following:
         # @@@@@@@@@@@@@@@ ...
@@ -346,30 +357,43 @@ class T2Timestep(object):
             # FOR CONSTANT RATE ONLY. 
             self.mass_injected = self.rate * self.step_time * 24. * 3600.
 
-            # read through lines until 'VOL.' is hit, get 
-            # initial mass balances for each phase
-            # VOL. (m^3) * 0.00000000E+00 0.62971493E+07 0.00000000E+00 \
-            # GAS PHASE  * 0.16497908E+06 0.00000000E+00 0.11330593E+09 0.65583271E+14
-            while s == [] or s[0]!= 'VOL.':
-                line = f.readline()
-                s = line.split()
-            self.gas_mass_water = float(s[9])
-            self.gas_mass_nacl =  float(s[10])
-            self.gas_mass_co2 =   float(s[11])
-            
-            # PHASES     *      GAS          AQUEOUS        SOLID       \
-            # COMPONENTS *     WATER          SALT             CO2           HEAT
-            #reads one line to get to masses and aqueous phase
-            # MASS (kg)  * 0.00000000E+00 0.64182984E+10 0.00000000E+00 \
-            # AQUEOUS    * 0.62100916E+10
+            f = self.read_balance_block(f)
+        else:
+            g = self.read_balance_block(g)
+
+        print "timestep read"
+        return f
+
+    def read_balance_block(self, f):
+        line = f.readline()
+        s = line.split()
+        # read through lines until 'VOL.' is hit, get 
+        # initial mass balances for each phase
+        # VOL. (m^3) * 0.00000000E+00 0.62971493E+07 0.00000000E+00 \
+        # GAS PHASE  * 0.16497908E+06 0.00000000E+00 0.11330593E+09 0.65583271E+14
+        while s == [] or s[0]!= 'VOL.':
             line = f.readline()
             s = line.split()
-            self.gas_mass_total = float(s[3])
-            self.aq_mass_total =float(s[4])
-            self.aq_mass_water =float(s[8])
-            self.aq_mass_nacl = float(s[9])
-            self.aq_mass_co2 =  float(s[10])
-
+        self.gas_mass_water = float(s[9])
+        self.gas_mass_nacl =  float(s[10])
+        self.gas_mass_co2 =   float(s[11])
+        
+        # PHASES     *      GAS          AQUEOUS        SOLID       \
+        # COMPONENTS *     WATER          SALT             CO2           HEAT
+        #reads one line to get to masses and aqueous phase
+        # MASS (kg)  * 0.00000000E+00 0.64182984E+10 0.00000000E+00 \
+        # AQUEOUS    * 0.62100916E+10
+        line = f.readline()
+        s = line.split()
+        self.gas_mass_total = float(s[3])
+        self.aq_mass_total =float(s[4])
+        self.aq_mass_water =float(s[8])
+        self.aq_mass_nacl = float(s[9])
+        self.aq_mass_co2 =  float(s[10])
+        # Makes sure to not double read sand/system balances
+        while s == [] or s[0]!= 'VOL.':
+            line = f.readline()
+            s = line.split()
         return f
 
     def get_co2_density_viscosity(self):

@@ -36,9 +36,9 @@ if __name__ == '__main__':
     cells, time_steps = vr.read_output_data(layer = layer)
     t_read = clock()
 
-    uniform = True
-    sleipner = False
-    yearwise = False
+    uniform = False
+    sleipner = True
+    yearwise = True
     if uniform == True:
         nx = 25
         ny = 25
@@ -66,8 +66,8 @@ if __name__ == '__main__':
     print "Creating directory: " + sim_title 
     call(["mkdir",sim_title])
 
-    #vr.plot_wellhead_pressure(cells, time_steps, hydro_folder, hydro_layer_name,\
-            #fmt = fmt, sleipner = False )
+    vr.plot_wellhead_pressure(cells, time_steps, hydro_folder, hydro_layer_name,\
+            fmt = fmt, sleipner = False )
 
     move_files(fmt, sim_title)
     print "total time processing vesa"

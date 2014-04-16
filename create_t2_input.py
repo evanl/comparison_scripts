@@ -86,7 +86,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
         rel_perm = 'vanGenuchten'
 
     if cap == 'vanGenuchten':
-        cp_vals = [0.4, 0.0, 1.61e-3, 1.e7, 0.999]
+        cp_vals = [0.4, 0.0, 1.61e-3, 1.e1, 0.999]
     elif cap == 'none':
         cp_vals = []
     else:
@@ -102,6 +102,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
             rp = rel_perm, cp = cap)
 
     it2f.write_separator(f, 'ROCKS')
+    # SANDDDD
     it2f.write_rocks(f, name, sand_density, porosity, xperm, yperm, zperm, \
         cp_vals, rp_vals, thermk = 2.51, specheat = 920., \
         cap = cap, rel_perm = rel_perm)
@@ -171,7 +172,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     tg = it2f.T2InputGrid(nx, ny, nz)
 
     solubility = 0.454104e-3
-    solubility = 0.0
+    #solubility = 0.0
 
     if uniform == True:
         brine_density = 1016.4
@@ -186,7 +187,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
                 type1_source_cell = type1_source_cell)
     else:
         brine_density = 1019.35
-        tg.fill_3d_grid(e_cel, temperature = 32., density = brine_density,\
+        tg.fill_3d_grid(e_cel, temperature = 37., density = brine_density,\
                 two_d = two_d, solubility = solubility,\
                 five_section = fs, shale = shale)
         tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
@@ -240,7 +241,7 @@ if __name__ == '__main__':
     linear_rp = False
     no_cap = False
     type1_source = True
-    sat_frac = 0.4
+    sat_frac = 0.12
     # sanity check
     if hydro == True:
         hd = False
@@ -248,7 +249,7 @@ if __name__ == '__main__':
     else:
         hd = 'u25_hydro'
         #hd = 'u25_hydro_no_dissolution'
-        #hd = 'sl_noshale_hydro'
+        #hd = 'sl_noshale_42_hydro'
         if two_d == True:
             #hd = 'sl_twod_hydro'
             hd = 'sl_twod_hydro_32'
@@ -258,7 +259,7 @@ if __name__ == '__main__':
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 24, days_per_step = 15., fs = fs_sec,\
+            num_steps = 5, days_per_step = 15, fs = fs_sec,\
             bc_type = bc_type, column_inj = column_inj, linear_rp = linear_rp,\
             linear_cap = no_cap, shale = shale, tolerance = -5,\
             type1_source = type1_source, sat_frac = sat_frac)

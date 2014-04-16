@@ -11,10 +11,12 @@ import vesa.VESA_02_01_13.vesa_reading_functions as vr
 
 class Compare:
     def __init__(self, sim_titles, num_vesa_sims, 
-            sleipner, section,\
-            vesa_hydro_folder = 'unif_hydro'):
+            sleipner, section, split = 0,\
+            vesa_hydro_folder = 'unif_hydro', parallel = False):
         self.num_vesa_sims = num_vesa_sims
         self.simulations = []
+        self.part2 = parallel
+        self.split = split
         print "------------------------------------------------------------\n"
         print "Comparing VESA Simulations:"
         for i in range(num_vesa_sims):
@@ -36,7 +38,8 @@ class Compare:
             print "reading TOUGH2 Simulation: " + sim_titles[i]
             tough_dirname = current_directory + "/tough/t2/" + sim_titles[i] + "_dir/"
             os.chdir(tough_dirname)
-            t2_grid, t2_timesteps = pt2.process_t2_output(tough_simtitle)
+            t2_grid, t2_timesteps = pt2.process_t2_output(tough_simtitle, \
+                    parallel = self.part2, split = self.split)
             self.simulations.append(Simulation(sim_titles[i], 'tough', \
                     t2_grid, t2_timesteps))
         # this reads the output for a given unit, but will not work for 
@@ -200,7 +203,7 @@ class Compare:
             self.add_t2_contours(t_index, 2, x_ind, valtype,\
                     time_indices = time_indices)
         elif sec_type == 'vesa':
-            self.add_vesa_sections(v_index, 2, x_ind, nx,\
+            self.add_vesa_sections(v_index, 1, x_ind, nx,\
                     time_indices = time_indices)
         #self.fig.tight_layout()
         self.fig.savefig(title + '.' + fmt, bbox_inches='tight',format=fmt)
@@ -331,18 +334,21 @@ if __name__ == '__main__':
     num_vesa_sims = 1
     sleipner = True
     section = False
-    c = Compare( sim_titles, num_vesa_sims, sleipner, section)
+    parallelt2 = True
+    split = 8
+    c = Compare( sim_titles, num_vesa_sims, sleipner, section, \
+            parallel = parallelt2, split = split)
     temp = '32'
     sec_type = 'tough'
     title = 'section_' + temp + '_' + sec_type
     c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [0, 3, 7])
+            time_indices = [1, 4, 7])
     sec_type = 'vesa'
     title = 'section_' + temp + '_' + sec_type
     c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [0, 3, 7])
+            time_indices = [1, 4, 7])
     fmt = 'png'
-    #vpl = 't' + temp + '_vesa_plume_bc'
+    #vpl = 't' + temp + '_vesa_plume_sharp'
     #c.create_vesa_plume_match(vpl, fmt)
     #tpl = 't' + temp + '_tough_plume'
     #c.create_tough_plume_match(tpl, fmt)

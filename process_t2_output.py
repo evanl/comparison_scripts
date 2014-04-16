@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import output_t2_funcs as t2o
 
-def process_t2_output(sim_title, parallel = False, par_sim_ending = 'n2'):
+def process_t2_output(sim_title, parallel = False, split = 0):
     # this must be changed to reflect the input data
     # create an output grid object
     grid = t2o.T2grid()
@@ -14,31 +14,44 @@ def process_t2_output(sim_title, parallel = False, par_sim_ending = 'n2'):
     # count the number of outputs
     num_outputs = 0 
     #if parallel == True:
-        #f = open('OUTPUT_DATA_'+ par_sim_ending)
+        #f = open('OUTPUT_DATA_'+ sim_title)
     #else:
         #f = open(sim_title + '.out')
-    f = open(sim_title + '.out')
+    #a = f.read()
+    #b = a.split()
+    #for char in b:
+        #if char == 'OUTPUT':
+            #num_outputs +=1
+    #print "The number of timesteps output: " + str(num_outputs)
+    #f.close()
+    num_outputs = 11
 
-    a = f.read()
-    b = a.split()
-    for char in b:
-        if char == 'OUTPUT':
-            num_outputs +=1
-    print "The number of timesteps output: " + str(num_outputs)
-    f.close()
-
-    # read the file for the timestep data
-    f = open(sim_title + '.out')
-    if parallel == False:
+    # read the file[s] for the timestep data
+    if parallel == True:
+        fname ='OUTPUT_DATA_' + sim_title
+        gname = 'OUTPUT_' + sim_title
+        print "fname " + fname
+        print "gname " + gname
+        f = open(fname)
+        g = open(gname)
+        grid.read_initial_mass(g)
+    else:
+        f = open(sim_title + '.out')
+        g = open(sim_title) # JUST A PLACEHOLD, BAD CODING <<<<<<<
         grid.read_initial_mass(f)
-
     time_steps = []
     for i in range(num_outputs):
+        if split !=0 and i > 7:
+            year_add = 8
+        else:
+            year_add = 0
         timetest = t2o.T2Timestep()
-        timetest.readOutput(f, grid, parallel = parallel)
+        timetest.readOutput(f, g, grid, \
+                parallel = parallel, year_add = year_add)
         timetest.get_co2_density_viscosity()
         time_steps.append(timetest)
     f.close()
+    g.close()
 
     return grid, time_steps
 
@@ -49,12 +62,13 @@ if __name__ == '__main__':
     sim_title = sys.argv[1]
     hydro = False
     two_d = False
-    sleipner = False
+    sleipner = True
     section = False
-    shale = True
-    parallel = False
+    shale = False
+    parallel = True
+    split = 8
     # creates a T2Grid object and a list of T2Timestep objects
-    grid, time_steps = process_t2_output(sim_title, parallel)
+    grid, time_steps = process_t2_output(sim_title, parallel, split = split)
     # choose format for plots.
     fmt = 'png'
     if two_d == True:
