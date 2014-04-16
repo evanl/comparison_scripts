@@ -437,16 +437,38 @@ class T2Timestep(object):
                 tempvals = sorted(tempvals, key = itemgetter(1))
                 vals.append(tempvals)
         elif axis == 3:                
-            for x in grid.x_vals:
-                tempvals = []
-                for el in self.elements:
-                    if x == grid.x[el]:
-                        if grid.k[el] == index:
-                            v = self.get_plot_value(el, valtype)
-                            tempvals.append(\
-                                (grid.x[el], grid.y[el], v))
-                tempvals = sorted(tempvals,key=itemgetter(1))
-                vals.append(tempvals)
+            if valtype == 'thickness':
+                vt = 'saturation'
+                nzmax = max(grid.k.iteritems(), key=itemgetter(1))[1]
+                nzmin = min(grid.k.iteritems(), key=itemgetter(1))[1] 
+                print "nzmin ", nzmin, "nzmax ", nzmax
+                for i in range(len(grid.x_vals)):
+                    tempvals = []
+                    for j in range(len(grid.y_vals)):
+                        thick = 0.
+                        for k in range(nzmin, nzmax):
+                            el = get_element_chars(i, j, k)
+                            v = self.get_plot_value(el, vt)
+                            if v > 0.75:
+                                thick += 1.
+                            if i == 65/2 and j == 119/2:
+                                print el, v, thick
+                        sat_frac = thick / float(nzmax - nzmin)
+                        tempvals.append(\
+                            (grid.x[el], grid.y[el], sat_frac))
+                    tempvals = sorted(tempvals,key=itemgetter(1))
+                    vals.append(tempvals)
+            else:
+                for x in grid.x_vals:
+                    tempvals = []
+                    for el in self.elements:
+                        if x == grid.x[el]:
+                            if grid.k[el] == index:
+                                v = self.get_plot_value(el, valtype)
+                                tempvals.append(\
+                                    (grid.x[el], grid.y[el], v))
+                    tempvals = sorted(tempvals,key=itemgetter(1))
+                    vals.append(tempvals)
         else:
             print "make_plot_grid: Please Specify Valid Axis\n\n "
             return 1

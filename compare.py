@@ -71,7 +71,8 @@ class Compare:
 
     def plot_contour(self, x, y, z, position = 111, ax_label = False,\
             contour_label = True, label = 'saturation []',\
-            title = 'saturation', xlab = 'x [m]', ylab = 'z [m]'):
+            title = 'saturation', xlab = 'x [m]', ylab = 'z [m]',\
+            section = False):
         """ takes in numpy arrays of same shape
         """
         ax_c = self.fig.add_subplot(position)
@@ -87,10 +88,12 @@ class Compare:
             self.fig.colorbar(CS, cax = cb_axes, format = '%.2f')
             #CB = plt.colorbar(CS, shrink = 1.0, pad=0.02, fraction = 0.07,\
                     #extend = 'both', format='%.2f')
-        ax_c.xaxis.set_ticks(np.arange(0,6000,2500))
         if ax_label != True:
             ax_c.set_yticklabels([])
-        #ax_c.set_xticklabels([])
+        if section == True:
+            ax_c.xaxis.set_ticks(np.arange(0,6000,2500))
+        else:
+            ax_c.set_xticklabels([])
 
         #ax_c.set_ylabel(ylab)
         #ax_c.set_xlabel(xlab)
@@ -119,7 +122,7 @@ class Compare:
         return 0
 
     def add_t2_contours(self, sim_index, axis, space_index, valtype,\
-            time_indices = [0,1]):
+            time_indices = [0,1], section = False):
         pos = 130
         for time_index in time_indices:
             contour_label = False
@@ -150,7 +153,8 @@ class Compare:
             self.plot_contour(x,y,z, position = pos, \
                     contour_label = contour_label, ax_label = ax_label,\
                     xlab = xlab, ylab = ylab,\
-                    title = label_str, label = 'saturation []')
+                    title = label_str, label = 'saturation []', 
+                    section = section)
         return 0
 
     def add_vesa_sections(self, sim_index, axis, space_index, nx,\
@@ -201,7 +205,7 @@ class Compare:
         valtype = 'saturation'
         if sec_type == 'tough':
             self.add_t2_contours(t_index, 2, x_ind, valtype,\
-                    time_indices = time_indices)
+                    time_indices = time_indices, section = True)
         elif sec_type == 'vesa':
             self.add_vesa_sections(v_index, 1, x_ind, nx,\
                     time_indices = time_indices)
@@ -275,7 +279,7 @@ class Compare:
             label_str = self.year_index(time_index)
             self.simulations[sim_index].time_steps[time_index].make_plot_grid(\
                     self.simulations[sim_index].grid_cells, \
-                    axis, space_index, 'saturation')
+                    axis, space_index, 'thickness')
             x, y, z = self.simulations[sim_index].time_steps[time_index].format_plot_grid(\
                     self.simulations[sim_index].grid_cells, \
                     axis, self.sleipner, self.section)
@@ -339,16 +343,16 @@ if __name__ == '__main__':
     c = Compare( sim_titles, num_vesa_sims, sleipner, section, \
             parallel = parallelt2, split = split)
     temp = '32'
-    sec_type = 'tough'
-    title = 'section_' + temp + '_' + sec_type
-    c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [1, 4, 7])
-    sec_type = 'vesa'
-    title = 'section_' + temp + '_' + sec_type
-    c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [1, 4, 7])
+    #sec_type = 'tough'
+    #title = 'section_' + temp + '_' + sec_type
+    #c.create_cross_section_comparison(title, sec_type = sec_type,\
+            #time_indices = [1, 4, 7])
+    #sec_type = 'vesa'
+    #title = 'section_' + temp + '_' + sec_type
+    #c.create_cross_section_comparison(title, sec_type = sec_type,\
+            #time_indices = [1, 4, 7])
     fmt = 'png'
-    #vpl = 't' + temp + '_vesa_plume_sharp'
-    #c.create_vesa_plume_match(vpl, fmt)
-    #tpl = 't' + temp + '_tough_plume'
-    #c.create_tough_plume_match(tpl, fmt)
+    vpl = 't' + temp + '_vesa_plume_sharp'
+    c.create_vesa_plume_match(vpl, fmt)
+    tpl = 't' + temp + '_tough_plume'
+    c.create_tough_plume_match(tpl, fmt)
