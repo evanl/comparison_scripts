@@ -5,7 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import output_t2_funcs as t2o
 
-def process_t2_output(sim_title, parallel = False, split = 0):
+def process_t2_output(sim_title, parallel = False, split = 0,\
+        double_balance = False):
     # this must be changed to reflect the input data
     # create an output grid object
     grid = t2o.T2grid()
@@ -46,8 +47,9 @@ def process_t2_output(sim_title, parallel = False, split = 0):
         else:
             year_add = 0
         timetest = t2o.T2Timestep()
-        timetest.readOutput(f, g, grid, \
-                parallel = parallel, year_add = year_add)
+        double_read = double_balance
+        timetest.readOutput(f, g, grid, parallel = parallel, \
+                year_add = year_add, double_read = double_read)
         timetest.get_co2_density_viscosity()
         time_steps.append(timetest)
     f.close()
@@ -66,9 +68,11 @@ if __name__ == '__main__':
     section = False
     shale = False
     parallel = True
-    split = 8
+    split = 0
+    double_balance = True
     # creates a T2Grid object and a list of T2Timestep objects
-    grid, time_steps = process_t2_output(sim_title, parallel, split = split)
+    grid, time_steps = process_t2_output(sim_title, parallel, split = split,\
+            double_balance = double_balance)
     # choose format for plots.
     fmt = 'png'
     if two_d == True:
@@ -117,8 +121,7 @@ if __name__ == '__main__':
         t2o.plot_incon_change_vs_index(grid, time_steps, vs_elev = True)
         t2o.check_3d_hydro_pressure(grid, time_steps)
 
-    if parallel == False:
-        t2o.plot_mass_balance(grid, time_steps)
+    t2o.plot_mass_balance(grid, time_steps)
 
     t2o.write_viscosity(grid, time_steps)
 
@@ -126,8 +129,15 @@ if __name__ == '__main__':
     call(["mkdir",sim_title_dir])
     movestring = "mv " + "*" + fmt +" " + sim_title_dir
     call(movestring, shell=True)
-    call (["mv",sim_title,sim_title_dir])
-    call (["mv",sim_title+'.out',sim_title_dir])
+    if parallel == False:
+        call (["mv",sim_title,sim_title_dir])
+        call (["mv",sim_title+'.out',sim_title_dir])
+    else:
+        fname ='OUTPUT_DATA_' + sim_title
+        gname = 'OUTPUT_' + sim_title
+        call (["mv",fname,sim_title_dir])
+        call (["mv",gname,sim_title_dir])
+
     call (["mv",'INCON' ,sim_title_dir])
     call (["mv",'MESH' ,sim_title_dir])
     call (["mv",'SAVE' ,sim_title_dir])

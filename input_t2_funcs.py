@@ -1076,6 +1076,9 @@ class T2InputGrid(object):
                             j == 0 or j == (self.ny - self.ny_start - 1 )):
                         self.boundary.append(eleme)
                     elif boundary_type == 1 and type1_source_cell == eleme:
+                        print "YAY"
+                        print "element ", eleme, " is on the boundary!~"
+                        print "YAY"
                         self.boundary.append(eleme)
                     else: 
                         vw = format_float_mesh(self.vol[eleme])

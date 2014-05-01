@@ -234,7 +234,8 @@ class T2Timestep(object):
             return 1
         return v
 
-    def readOutput(self, f, g, grid, parallel = False, year_add = 0.):
+    def readOutput(self, f, g, grid, parallel = False, year_add = 0.,
+            double_read = False):
         """
         reads through the already opened t2run.out file until it finds the 
         next block of output data. 
@@ -359,12 +360,12 @@ class T2Timestep(object):
 
             f = self.read_balance_block(f)
         else:
-            g = self.read_balance_block(g)
+            g = self.read_balance_block(g, double_read = double_read)
 
         print "timestep read"
         return f
 
-    def read_balance_block(self, f):
+    def read_balance_block(self, f, double_read = False):
         line = f.readline()
         s = line.split()
         # read through lines until 'VOL.' is hit, get 
@@ -391,9 +392,10 @@ class T2Timestep(object):
         self.aq_mass_nacl = float(s[9])
         self.aq_mass_co2 =  float(s[10])
         # Makes sure to not double read sand/system balances
-        while s == [] or s[0]!= 'VOL.':
-            line = f.readline()
-            s = line.split()
+        if double_read == True:
+            while s == [] or s[0]!= 'VOL.':
+                line = f.readline()
+                s = line.split()
         return f
 
     def get_co2_density_viscosity(self):

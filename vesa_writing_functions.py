@@ -4,16 +4,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Injector(object):
-    def __init__(self, index, x, y, ratio, layer_id, end_intervals, mass_rate):
+    def __init__(self, index, x, y, ratio, layer_id, end_days, mass_rate):
         self.index = index
         self.x = x
         self.y = y
         self.ratio = ratio
         self.layer_id = layer_id
-        self.end_intervals = end_intervals # list of intervals in integer days
+        self.end_days = end_days # list of intervals in integer days
         self.mass_rate = mass_rate # list of mass rate is given in Mt/yr
         self.radius = 1.0
-        if len(mass_rate) != len(end_intervals):
+        if len(mass_rate) != len(end_days):
             print "Mass inflow and interval ends must match"
             return 1
     def write_injector(self, f):
@@ -24,7 +24,8 @@ class Injector(object):
                 str(self.radius), str(len(self.mass_rate))]))
         f.write('\n')
         for i in range(len(self.mass_rate)):
-            f.write(', '.join([str(self.end_intervals[i]), \
+            print len(self.mass_rate), len(self.end_days)
+            f.write(', '.join([str(self.end_days[i]), \
                     str(self.mass_rate[i])]))
             f.write('\n')
         return f
@@ -201,6 +202,7 @@ class Layer(object):
                 else:
                     k_write = kmean
                 phimean , phivar = stats(columnphi)
+                phimean = 0.27
 
                 top_b = -columnz[0]
                 bottom_b = -columnz[-1]

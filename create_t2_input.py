@@ -5,13 +5,15 @@ from time import clock
 import read_eclipse as re
 import eclipse_cells as ec
 import input_t2_funcs as it2f
+from subprocess import call
 
 def create_t2_input(sim_title, two_d = False, uniform = False,\
         sleipner = False, hydro = False, hydro_directory = False,\
         num_steps = 11, days_per_step = 365.25, fs = [],\
         bc_type = 1, column_inj = False, linear_rp = False,\
         linear_cap = False, shale = True, tolerance = -7,\
-        type1_source = False, sat_frac = 0.8):
+        type1_source = False, sat_frac = 0.8,\
+        write_mesh = True):
     print 'CREATING TOUGH2 INPUT FILE'
     if two_d == True:
         eleme = 'aH732'
@@ -187,12 +189,16 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
                 type1_source_cell = type1_source_cell)
     else:
         brine_density = 1019.35
-        tg.fill_3d_grid(e_cel, temperature = 37., density = brine_density,\
-                two_d = two_d, solubility = solubility,\
-                five_section = fs, shale = shale)
-        tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
-                boundary_type = bc_type, shale = shale,\
-                type1_source_cell = type1_source_cell)
+        if write_mesh == True:
+            tg.fill_3d_grid(e_cel, temperature = 37., density = brine_density,\
+                    two_d = two_d, solubility = solubility,\
+                    five_section = fs, shale = shale)
+            tg.write_mesh(e_cel, two_d = two_d, uniform = uniform,\
+                    boundary_type = bc_type, shale = shale,\
+                    type1_source_cell = type1_source_cell)
+        else:
+            hdm = hydro_directory + '_dir/MESH'
+            call (["cp", hdm, './'])
 
 
     if hydro_directory == False:
@@ -234,22 +240,22 @@ if __name__ == '__main__':
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
     hydro = False
-    uniform = True
+    uniform = False
     two_d = False
-    sleipner = False
-    shale = True
+    sleipner = True
+    shale = False
     linear_rp = False
     no_cap = False
     type1_source = True
-    sat_frac = 0.12
+    sat_frac = 0.50
     # sanity check
     if hydro == True:
         hd = False
         bc_type = 2
     else:
-        hd = 'u25_hydro'
+        #hd = 'u25_hydro'
         #hd = 'u25_hydro_no_dissolution'
-        #hd = 'sl_noshale_42_hydro'
+        hd = 'sl_noshale_hydro'
         if two_d == True:
             #hd = 'sl_twod_hydro'
             hd = 'sl_twod_hydro_32'
@@ -259,7 +265,7 @@ if __name__ == '__main__':
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 5, days_per_step = 15, fs = fs_sec,\
+            num_steps = 11, days_per_step = 365.25, fs = fs_sec,\
             bc_type = bc_type, column_inj = column_inj, linear_rp = linear_rp,\
             linear_cap = no_cap, shale = shale, tolerance = -5,\
             type1_source = type1_source, sat_frac = sat_frac)

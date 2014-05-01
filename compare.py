@@ -12,7 +12,8 @@ import vesa.VESA_02_01_13.vesa_reading_functions as vr
 class Compare:
     def __init__(self, sim_titles, num_vesa_sims, 
             sleipner, section, split = 0,\
-            vesa_hydro_folder = 'unif_hydro', parallel = False):
+            vesa_hydro_folder = 'unif_hydro', parallel = False, \
+            double_balance = False):
         self.num_vesa_sims = num_vesa_sims
         self.simulations = []
         self.part2 = parallel
@@ -39,7 +40,8 @@ class Compare:
             tough_dirname = current_directory + "/tough/t2/" + sim_titles[i] + "_dir/"
             os.chdir(tough_dirname)
             t2_grid, t2_timesteps = pt2.process_t2_output(tough_simtitle, \
-                    parallel = self.part2, split = self.split)
+                    parallel = self.part2, split = self.split,\
+                    double_balance = double_balance)
             self.simulations.append(Simulation(sim_titles[i], 'tough', \
                     t2_grid, t2_timesteps))
         # this reads the output for a given unit, but will not work for 
@@ -339,20 +341,27 @@ if __name__ == '__main__':
     sleipner = True
     section = False
     parallelt2 = True
-    split = 8
-    c = Compare( sim_titles, num_vesa_sims, sleipner, section, \
-            parallel = parallelt2, split = split)
-    temp = '32'
-    #sec_type = 'tough'
-    #title = 'section_' + temp + '_' + sec_type
-    #c.create_cross_section_comparison(title, sec_type = sec_type,\
-            #time_indices = [1, 4, 7])
-    #sec_type = 'vesa'
-    #title = 'section_' + temp + '_' + sec_type
-    #c.create_cross_section_comparison(title, sec_type = sec_type,\
-            #time_indices = [1, 4, 7])
+    double_balance = False
+    split = 0
     fmt = 'png'
-    vpl = 't' + temp + '_vesa_plume_sharp'
-    c.create_vesa_plume_match(vpl, fmt)
-    tpl = 't' + temp + '_tough_plume'
+    c = Compare( sim_titles, num_vesa_sims, sleipner, section, \
+            parallel = parallelt2, split = split,\
+            double_balance = double_balance)
+
+    #TOUGH2
+    toughid = '32_type1_sc50'
+    sec_type = 'tough'
+    title ='t' + toughid + '_' + sec_type + '_section' 
+    c.create_cross_section_comparison(title, sec_type = sec_type,\
+            time_indices = [1, 4, 7])
+    tpl = 't' + toughid + '_tough_plume'
     c.create_tough_plume_match(tpl, fmt)
+
+    #VESA
+    vesa_id = '32_halfconst'
+    sec_type = 'vesa'
+    title ='t' + vesa_id + '_' + sec_type + '_section' 
+    c.create_cross_section_comparison(title, sec_type = sec_type,\
+            time_indices = [1, 4, 7])
+    vpl = 't' + vesa_id + '_vesa_plume_sharp'
+    c.create_vesa_plume_match(vpl, fmt)
