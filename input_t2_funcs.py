@@ -742,9 +742,6 @@ class T2InputGrid(object):
                     ind = self.e_cell_index(i, j, k)
                     eleme = self.get_element_chars(i, j, k)
                     if shale == True or e_cells[ind].getXPermeability() > 1.:
-                        if i == 32:
-                            if j == 77:
-                                print k, e_cells[ind].getXPermeability()
                         if e_cells[ind].getXPermeability() > 1.:
                             sand_count +=1
                         count +=1
@@ -791,18 +788,18 @@ class T2InputGrid(object):
             pc_count = []
             for k in range(self.nz):
                 pc_ind = self.e_cell_index(i,j,k)
+                pc_ind = self.e_cell_index(i,j,k)
                 if e_cells[pc_ind].getXPermeability() > 1.:
+                    pc_ind_1 = self.e_cell_index(i,j,k+1)
                     pc_count.append(k)
+                    ztop = -e_cells[pc_ind].getTopZ()
+                    zbot = -e_cells[pc_ind_1].getTopZ()
+                    dz =  ztop - zbot
+                    if i == 32 or i == 25:
+                        if j == 77:
+                            print "i, j, k, dz, ", i, j, k, dz
             bot_ind = self.e_cell_index(i, j, pc_count[-1])
             top_ind = self.e_cell_index(i, j, pc_count[0])
-            #ztop = -e_cells[top_ind].gettopz()
-            #zbot = -e_cells[bot_ind].getTopZ()
-            #self.z_top[eleme] = -zbot
-            #self.z_bot[eleme] = -ztop
-            #z =  0.5 * (ztop + zbot)
-            #dx = self.get_dx(eleme, 1)
-            #dy = self.get_dx(eleme, 2)
-            #dz = zbot - ztop
             #volume = dx * dy * dz
             #new idea
             tc = e_cells[top_ind].getCorners()

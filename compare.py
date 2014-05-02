@@ -56,11 +56,11 @@ class Compare:
     def create_blank_figure(self, fontsize = 14, compare_type = 'none'):
         self.set_font_size(size = fontsize)
         if compare_type == 'section':
-            self.fig = plt.figure(figsize=(20.0,6.0), dpi=480)
+            self.fig = plt.figure(figsize=(20.0,6.0), dpi=960)
         elif compare_type == 'horizontal':
-            self.fig = plt.figure(figsize=(8.0,10.0), dpi=480)
+            self.fig = plt.figure(figsize=(8.0,10.0), dpi=960)
         elif compare_type == 'plume':
-            self.fig = plt.figure(figsize=(10.0,2.5), dpi=480)
+            self.fig = plt.figure(figsize=(10.0,2.5), dpi=960)
         else:
             self.fig = plt.figure()
         return 0
@@ -195,9 +195,8 @@ class Compare:
         return 0
 
     def create_cross_section_comparison(self, title, sec_type = 'tough',\
-            time_indices=[0,1]):
+            time_indices=[0,1], fmt = 'png'):
         self.create_blank_figure(fontsize = 16, compare_type ='section')
-        fmt = 'png'
         nx = 65
         ny = 119
         x_ind = nx/2
@@ -343,25 +342,25 @@ if __name__ == '__main__':
     parallelt2 = True
     double_balance = False
     split = 0
-    fmt = 'png'
+    fmt = 'pdf'
     c = Compare( sim_titles, num_vesa_sims, sleipner, section, \
             parallel = parallelt2, split = split,\
             double_balance = double_balance)
 
     #TOUGH2
-    toughid = '32_type1_sc50'
+    toughid = '32_nocap_sc40'
     sec_type = 'tough'
     title ='t' + toughid + '_' + sec_type + '_section' 
     c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [1, 4, 7])
+            time_indices = [1, 4, 7], fmt = fmt)
     tpl = 't' + toughid + '_tough_plume'
     c.create_tough_plume_match(tpl, fmt)
 
     #VESA
-    vesa_id = '32_halfconst'
+    vesa_id = '42_var_inj_phi27'
     sec_type = 'vesa'
     title ='t' + vesa_id + '_' + sec_type + '_section' 
     c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [1, 4, 7])
+            time_indices = [1, 4, 7], fmt = fmt)
     vpl = 't' + vesa_id + '_vesa_plume_sharp'
     c.create_vesa_plume_match(vpl, fmt)

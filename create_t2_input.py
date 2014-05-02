@@ -239,14 +239,14 @@ if __name__ == '__main__':
     # using density estimates. If a directory is specified, the 
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
-    hydro = False
+    hydro = True
     uniform = False
-    two_d = False
+    two_d = True
     sleipner = True
-    shale = False
+    shale = True
     linear_rp = False
     no_cap = False
-    type1_source = True
+    type1_source = False
     sat_frac = 0.50
     # sanity check
     if hydro == True:

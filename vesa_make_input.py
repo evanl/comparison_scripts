@@ -19,9 +19,9 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     ratio = 1.
     layer_id = 1
     l_type = 1
-    #massinflow = [0.0198, 0.0405, 0.0437, 0.0540, 0.0740, 0.1030, \
-                  #0.1390, 0.1830, 0.2370, 0.2960, 0.370]
-    massinflow = [0.5 * 0.1418]
+    massinflow = [0.0198, 0.0405, 0.0437, 0.0540, 0.0740, 0.1030, \
+                  0.1390, 0.1830, 0.2370, 0.2960, 0.370]
+    #massinflow = [0.5 * 0.1418]
     if uniform == True:
         massinflow = [0.031536]
         # matches with 1 kg/sec
@@ -30,8 +30,8 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
 
     simtime_days = []
     for i in range(len(massinflow)):
-        if len(massinflow) == 1:
-            i = 10
+        #if len(massinflow) == 1:
+            #i = 10
         days = (i+1) * 365.25
         simtime_days.append(days)
 
@@ -39,14 +39,14 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     # 37
     # 42
     # density of C02 [kg/m^3]
-    co2_rho = 706.
+    #co2_rho = 706.
     #co2_rho = 465.
-    #co2_rho = 308.
+    co2_rho = 308.
 
     #viscosity of CO2 [Pa s]
-    co2_mu = 5.767e-5
+    #co2_mu = 5.767e-5
     #co2_mu = 3.35e-5
-    #co2_mu = 2.41e-5
+    co2_mu = 2.41e-5
     
     #density of brine [kg/m^3]
     #brine_rho = 1020.
@@ -93,7 +93,7 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
         unit = wf.Layer(layers[0], l_type, layer_id, co2_rho, brine_rho, co2_mu,\
                 brine_mu, sc_res, sb_res, c_co2, c_brine, c_rock, cap_rp_id,\
                 nx, ny, nz = nz, gradient = 10., \
-                homogeneous = homogeneous, permval = 2000.)
+                homogeneous = homogeneous, permval = 2000., poroval = 0.27)
         unit.fill_nonuniform_grid(e_cells)
         unit.plot_perm_data(e_cells)
         xwell = xlocs[0]

@@ -440,22 +440,21 @@ class T2Timestep(object):
                 vals.append(tempvals)
         elif axis == 3:                
             if valtype == 'thickness':
-                vt = 'saturation'
+                vtype = 'saturation'
                 nzmax = max(grid.k.iteritems(), key=itemgetter(1))[1]
                 nzmin = min(grid.k.iteritems(), key=itemgetter(1))[1] 
                 print "nzmin ", nzmin, "nzmax ", nzmax
                 for i in range(len(grid.x_vals)):
                     tempvals = []
                     for j in range(len(grid.y_vals)):
-                        thick = 0.
+                        num_cells = 0
+                        sat_sum = 0.
                         for k in range(nzmin, nzmax):
                             el = get_element_chars(i, j, k)
-                            v = self.get_plot_value(el, vt)
-                            if v > 0.75:
-                                thick += 1.
-                            if i == 65/2 and j == 119/2:
-                                print el, v, thick
-                        sat_frac = thick / float(nzmax - nzmin)
+                            v = self.get_plot_value(el, vtype)
+                            num_cells +=1
+                            sat_sum += v
+                        sat_frac = sat_sum / num_cells
                         tempvals.append(\
                             (grid.x[el], grid.y[el], sat_frac))
                     tempvals = sorted(tempvals,key=itemgetter(1))

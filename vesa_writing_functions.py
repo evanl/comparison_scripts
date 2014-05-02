@@ -60,7 +60,7 @@ class Layer(object):
     def __init__(self, layer_name, l_type, l_id, l_co2_rho, l_bri_rho, l_co2_mu,\
             l_bri_mu, sc_res, sb_res, c_co2, c_bri, c_roc, cap_rp_id, \
             nx, ny, nz = 1, gradient = 10.,\
-            homogeneous = False, permval = 2000.):
+            homogeneous = False, permval = 2000., poroval = False):
         """
         self.layer_name : Name of Text File
         l_type : Layer Type
@@ -98,6 +98,7 @@ class Layer(object):
         self.nz = nz
         self.homogeneous = homogeneous
         self.permval = permval
+        self.poroval = poroval
 
 
     def fill_uniform_grid(self, dx, dy, dz, center_depth, phi, k):
@@ -201,8 +202,10 @@ class Layer(object):
                     k_write = self.permval
                 else:
                     k_write = kmean
-                phimean , phivar = stats(columnphi)
-                phimean = 0.27
+                if self.poroval == False:
+                    phimean , phivar = stats(columnphi)
+                else:
+                    phimean = self.poroval
 
                 top_b = -columnz[0]
                 bottom_b = -columnz[-1]
