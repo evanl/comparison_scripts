@@ -530,6 +530,8 @@ class T2Timestep(object):
         indstr = "Index = " + str(index) 
         print "Plotting Planar Timestep: " + '\n' + valstr + axstr + indstr
         xpl, ypl, val = self.format_plot_grid(grid, axis, sleipner, section, shale)
+        font = { 'size' : '16'}
+        matplotlib.rc('font', **font)
         f = plt.figure(num=None, dpi=480, facecolor= 'w',\
                 #figsize=(7.5,10), 
             edgecolor ='k')
@@ -546,34 +548,37 @@ class T2Timestep(object):
             CS = ax.contourf(xpl,ypl,val) 
             CB = plt.colorbar(CS, shrink = 0.8, extend = 'both')
             CB.set_label("Pressure [Pa]")
-            f.suptitle("T2slice, simulation: "+ name + ": + " + \
-                    "\n Pressure in  " + title_time + \
-                    axstr + indstr)
+            #f.suptitle("T2slice, simulation: "+ name + ": + " + \
+                    #"\n Pressure in  " + title_time + \
+                    #axstr + indstr)
+            f.suptitle("Time = " + title_time)
         elif valtype == 'saturation':
             V = np.linspace(0.,0.8,num=Nlevels)
             CS = ax.contourf(xpl,ypl,val,V) 
             CB = plt.colorbar(CS, shrink = 0.8, extend = 'both', ticks =V )
             CB.set_label("Saturation []")
-            f.suptitle("T2slice, simulation: "+ name + ": + " + \
-                    "\n Saturation in  " + title_time +\
-                    axstr + indstr)
+            #f.suptitle("T2slice, simulation: "+ name + ": + " + \
+                    #"\n Saturation in  " + title_time +\
+                    #axstr + indstr)
+            f.suptitle("Time = " + title_time)
         elif valtype == 'delta_p':
             CS = ax.contourf(xpl,ypl,val) 
             CB = plt.colorbar(CS, shrink = 0.8, extend = 'both')
             CB.set_label("Pressure Difference P - Po [Pa]")
-            f.suptitle("T2slice, simulation: "+ name + ": + " + \
-                    "\n Pressure Difference in  " + title_time+\
-                    axstr + indstr)
+            #f.suptitle("T2slice, simulation: "+ name + ": + " + \
+                    #"\n Pressure Difference in  " + title_time+\
+                    #axstr + indstr)
+            f.suptitle("Time = " + title_time)
         else: 
             print "pressure or saturation ? "
             return 1
 
         if axis == 1:
             ax.set_xlabel('x-direction [m]')
-            ax.set_ylabel('z-direction [m]')
+            ax.set_ylabel('elevation [m]')
         elif axis == 2:
             ax.set_xlabel('y-direction [m]')
-            ax.set_ylabel('z-direction [m]')
+            ax.set_ylabel('elevation [m]')
         elif axis == 3:
             ax.set_xlabel('x-direction [m]')
             ax.set_ylabel('y-direction [m]')

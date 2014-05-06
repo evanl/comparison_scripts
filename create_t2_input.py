@@ -100,7 +100,7 @@ def create_t2_input(sim_title, two_d = False, uniform = False,\
     else:
         rp_vals = [0.2, 0., 1., 1.]# linear
 
-    it2f.plot_relperm_cap(rp_vals, cp_vals, fmt = 'png',\
+    it2f.plot_relperm_cap(rp_vals, cp_vals, fmt = 'pdf',\
             rp = rel_perm, cp = cap)
 
     it2f.write_separator(f, 'ROCKS')
@@ -239,10 +239,10 @@ if __name__ == '__main__':
     # using density estimates. If a directory is specified, the 
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
-    hydro = True
-    uniform = False
-    two_d = True
-    sleipner = True
+    hydro = False
+    uniform = True
+    two_d = False
+    sleipner = False
     shale = True
     linear_rp = False
     no_cap = False
@@ -253,9 +253,9 @@ if __name__ == '__main__':
         hd = False
         bc_type = 2
     else:
-        #hd = 'u25_hydro'
+        hd = 'u25_hydro'
         #hd = 'u25_hydro_no_dissolution'
-        hd = 'sl_noshale_hydro'
+        #hd = 'sl_noshale_hydro'
         if two_d == True:
             #hd = 'sl_twod_hydro'
             hd = 'sl_twod_hydro_32'
@@ -265,7 +265,7 @@ if __name__ == '__main__':
         sleipner = False
     print create_t2_input(sim_title, two_d = two_d, uniform = uniform, \
             sleipner = sleipner, hydro = hydro, hydro_directory = hd, \
-            num_steps = 11, days_per_step = 365.25, fs = fs_sec,\
+            num_steps = 24, days_per_step = 15, fs = fs_sec,\
             bc_type = bc_type, column_inj = column_inj, linear_rp = linear_rp,\
             linear_cap = no_cap, shale = shale, tolerance = -5,\
             type1_source = type1_source, sat_frac = sat_frac)

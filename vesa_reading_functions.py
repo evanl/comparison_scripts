@@ -127,7 +127,8 @@ def read_output_data(layer = 'SleipnerL9'):
         for i in range(0,len(templine)):
             cells[i].saturation.append(float(templine[i]))
             cells[i].sat_thickness.append(\
-                    float(templine[i]) * cells[i].get_thickness())
+                    float(templine[i]) * cells[i].get_thickness() /\
+                    (1 - 0.2))
         line = r.readline()
 
     r.close()
@@ -271,6 +272,8 @@ def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name,
     hydro_cells, hydro_time_steps = read_output_data(layer = hydro_layer_name)
     os.chdir('../')
 
+    font = { 'size' : '16'}
+    matplotlib.rc('font', **font)
     # for that cell, get the pressure over time
     if well_head_index != 0:
         pres_list = cells[well_head_index].get_item_list('pressure')
@@ -285,10 +288,9 @@ def plot_wellhead_pressure(cells, time_steps, hydro_directory, hydro_layer_name,
 
         f = plt.figure(num=None , dpi = 480, \
             facecolor = 'w', edgecolor = 'k')
-        f.suptitle('wellhead pressure vs time')
         ax = f.add_subplot(111)
-        ax.set_xlabel('time[days]')
-        ax.set_ylabel('pressure[kPa]')
+        ax.set_xlabel('Time [days]')
+        ax.set_ylabel('Wellhead Pressure [kPa]')
         p = plt.plot(time_ar, pres)
         f.savefig('wellhead_pressure' + '.' + fmt)
         plt.clf()
@@ -341,21 +343,24 @@ def plot_cross_sections(cells, time_steps, nx, axis = 2, index = 32,\
             str(index)
     for i in range(0,len(cells[0].get_item_list('saturation'))):
         print "Plotting Cross Section ..." + str(i)
+        font = { 'size' : '16'}
+        matplotlib.rc('font', **font)
         ys, zb, zt, plume = make_cross_sections(cells, i, axis, index, nx)
         f = plt.figure(num=None , dpi = 480, \
             facecolor = 'w', edgecolor = 'k')
-        title_string = \
-          'Cross section of formation: Axis {0}, Index {1}'.format(axis, index)
+        #title_string = \
+            #'Cross section of formation: Axis {0}, Index {1}: '.format(axis, index)
+        title_string = ''
         yrstring = '{:4d}'.format(int(time_steps[i]/365 + 1998))
         if yearwise == True:
             title_string += ' in ' + yrstring
         else:
-            title_string += ' at time t = {0} days'.format(time_steps[i])
+            title_string += 'Time t = {0} days'.format(time_steps[i])
         f.suptitle(title_string)
         ax = f.add_subplot(111)
-        ax.set_xlabel('distance [m]')
-        ax.set_ylabel('[m]')
-        p0 = plt.plot(ys, plume, label = "CO2 Plume")
+        ax.set_xlabel('Lateral Distance [m]')
+        ax.set_ylabel('Elevation [m]')
+        p0 = plt.plot(ys, plume, label = "CO2 Thickness")
         p1 = plt.plot(ys, zb, label = "Bottom Boundary")
         p2 = plt.plot(ys, zt, label = "Top Boundary")
         plt.legend(loc=4)

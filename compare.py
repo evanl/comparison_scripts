@@ -13,7 +13,8 @@ class Compare:
     def __init__(self, sim_titles, num_vesa_sims, 
             sleipner, section, split = 0,\
             vesa_hydro_folder = 'unif_hydro', parallel = False, \
-            double_balance = False):
+            double_balance = False,\
+            t2_read = True, vesa_read = True):
         self.num_vesa_sims = num_vesa_sims
         self.simulations = []
         self.part2 = parallel
@@ -28,22 +29,26 @@ class Compare:
             print  20*" "+ tough_simtitle
         print "------------------------------------------------------------\n"
         current_directory = os.getcwd()
-        for i in range(num_vesa_sims):
-            print "reading VESA Simulation: " + sim_titles[i]
-            vesa_dirname =  current_directory + "/vesa/VESA_02_01_13/" + sim_titles[i]
-            os.chdir(vesa_dirname)
-            vesa_cells, vesa_timesteps = vr.read_output_data(layer = vesa_simtitle)
-            self.simulations.append(Simulation(sim_titles[i], 'vesa', \
-                    vesa_cells, vesa_timesteps))
-        for i in range(num_vesa_sims, len(sim_titles)):
-            print "reading TOUGH2 Simulation: " + sim_titles[i]
-            tough_dirname = current_directory + "/tough/t2/" + sim_titles[i] + "_dir/"
-            os.chdir(tough_dirname)
-            t2_grid, t2_timesteps = pt2.process_t2_output(tough_simtitle, \
-                    parallel = self.part2, split = self.split,\
-                    double_balance = double_balance)
-            self.simulations.append(Simulation(sim_titles[i], 'tough', \
-                    t2_grid, t2_timesteps))
+        if vesa_read == True:
+            for i in range(num_vesa_sims):
+                print "reading VESA Simulation: " + sim_titles[i]
+                vesa_dirname =  current_directory + "/vesa/VESA_02_01_13/" + \
+                        sim_titles[i]
+                os.chdir(vesa_dirname)
+                vesa_cells, vesa_timesteps = vr.read_output_data(layer = \
+                        vesa_simtitle)
+                self.simulations.append(Simulation(sim_titles[i], 'vesa', \
+                        vesa_cells, vesa_timesteps))
+        if t2_read == True:
+            for i in range(num_vesa_sims, len(sim_titles)):
+                print "reading TOUGH2 Simulation: " + sim_titles[i]
+                tough_dirname = current_directory + "/tough/t2/" + sim_titles[i] + "_dir/"
+                os.chdir(tough_dirname)
+                t2_grid, t2_timesteps = pt2.process_t2_output(tough_simtitle, \
+                        parallel = self.part2, split = self.split,\
+                        double_balance = double_balance)
+                self.simulations.append(Simulation(sim_titles[i], 'tough', \
+                        t2_grid, t2_timesteps))
         # this reads the output for a given unit, but will not work for 
         # multiple units. the positions will have to be combined for that later
 
@@ -262,13 +267,17 @@ class Compare:
         self.fig.clf()
         return 0
 
-    def create_tough_plume_match(self, title, fmt):
+    def create_tough_plume_match(self, title, fmt, thickness = True):
         pos = 160
         self.create_blank_figure(fontsize = 14, compare_type = 'plume')
         time_indices = [0, 2, 3, 5, 7, 9]
         sim_index = 1
         axis = 3
         space_index = 3
+        if thickness == True:
+            thick = 'thickness'
+        else:
+            thick = 'saturation'
         for time_index in time_indices:
             pos +=1
             contour_label = False
@@ -280,7 +289,7 @@ class Compare:
             label_str = self.year_index(time_index)
             self.simulations[sim_index].time_steps[time_index].make_plot_grid(\
                     self.simulations[sim_index].grid_cells, \
-                    axis, space_index, 'thickness')
+                    axis, space_index, thick)
             x, y, z = self.simulations[sim_index].time_steps[time_index].format_plot_grid(\
                     self.simulations[sim_index].grid_cells, \
                     axis, self.sleipner, self.section)
@@ -340,27 +349,30 @@ if __name__ == '__main__':
     sleipner = True
     section = False
     parallelt2 = True
-    double_balance = False
-    split = 0
+    double_balance = True
+    split = 8
     fmt = 'pdf'
+    t2_read = False
+    vesa_read = True
     c = Compare( sim_titles, num_vesa_sims, sleipner, section, \
             parallel = parallelt2, split = split,\
-            double_balance = double_balance)
+            double_balance = double_balance, t2_read = t2_read,\
+            vesa_read = vesa_read)
 
     #TOUGH2
-    toughid = '32_nocap_sc40'
-    sec_type = 'tough'
-    title ='t' + toughid + '_' + sec_type + '_section' 
-    c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [1, 4, 7], fmt = fmt)
-    tpl = 't' + toughid + '_tough_plume'
-    c.create_tough_plume_match(tpl, fmt)
+    #toughid = '32_kpa7cap_topsat'
+    #sec_type = 'tough'
+    #title ='t' + toughid + '_' + sec_type + '_section' 
+    #c.create_cross_section_comparison(title, sec_type = sec_type,\
+            #time_indices = [1, 4, 7], fmt = fmt)
+    #tpl = 't' + toughid + '_tough_plume'
+    #c.create_tough_plume_match(tpl, fmt, thickness = False)
 
     #VESA
-    vesa_id = '42_var_inj_phi27'
+    vesa_id = '32_varinj_phi27'
     sec_type = 'vesa'
-    title ='t' + vesa_id + '_' + sec_type + '_section' 
+    title ='v' + vesa_id + '_' + sec_type + '_section' 
     c.create_cross_section_comparison(title, sec_type = sec_type,\
             time_indices = [1, 4, 7], fmt = fmt)
-    vpl = 't' + vesa_id + '_vesa_plume_sharp'
+    vpl = 'v' + vesa_id + '_vesa_plume_sharp'
     c.create_vesa_plume_match(vpl, fmt)

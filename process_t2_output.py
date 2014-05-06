@@ -25,7 +25,7 @@ def process_t2_output(sim_title, parallel = False, split = 0,\
             #num_outputs +=1
     #print "The number of timesteps output: " + str(num_outputs)
     #f.close()
-    num_outputs = 11
+    num_outputs = 24
 
     # read the file[s] for the timestep data
     if parallel == True:
@@ -64,10 +64,10 @@ if __name__ == '__main__':
     sim_title = sys.argv[1]
     hydro = False
     two_d = False
-    sleipner = True
+    sleipner = False
     section = False
-    shale = False
-    parallel = True
+    shale = True
+    parallel = False
     split = 0
     double_balance = True
     # creates a T2Grid object and a list of T2Timestep objects
@@ -97,7 +97,7 @@ if __name__ == '__main__':
                 k_layer = 26
         else:
             eleme = 'yB212'
-            k_layer = 24
+            k_layer = 0
             xind = 12
             yind = 12
         #modified for center

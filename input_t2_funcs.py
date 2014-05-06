@@ -146,10 +146,10 @@ def plot_relperm_cap(rp_vals, cp_vals, fmt = 'png',\
     matplotlib.rc('font', **font)
     f = plt.figure(num=None , dpi = 480, \
         facecolor = 'w', edgecolor = 'k')
-    f.suptitle('Capillary Pressure Curve')
+    #f.suptitle('Capillary Pressure Curve')
     ax = f.add_subplot(111)
-    ax.set_xlabel('S_w []')
-    ax.set_ylabel('Pressure [Pa]')
+    ax.set_xlabel('Sw []')
+    ax.set_ylabel('Capillary Pressure [Pa]')
     p = plt.plot(sat, pcap)
     f.savefig('capillary_pressure' + '.' + fmt)
     plt.clf()
@@ -157,9 +157,9 @@ def plot_relperm_cap(rp_vals, cp_vals, fmt = 'png',\
 
     g = plt.figure(num=None , dpi = 480, \
         facecolor = 'w', edgecolor = 'k')
-    g.suptitle('Relative Permeability Curves')
+    #g.suptitle('Relative Permeability Curves')
     ax = g.add_subplot(111)
-    ax.set_xlabel('S_w []')
+    ax.set_xlabel('Sw []')
     ax.set_ylabel('Relative Permeability []')
     p = plt.plot(sat, krl, label = 'liquid')
     p = plt.plot(sat, krg, label = 'gas')
@@ -1400,7 +1400,7 @@ class T2InputGrid(object):
         ax.set_ylabel('Y')
         if show == True:
             plt.show()
-        plt.savefig(title +'.png')
+        plt.savefig(title, fmt = '.pdf')
         plt.clf()
         plt.close()
         print "scatter plot complete"

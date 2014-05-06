@@ -356,8 +356,11 @@ class GridCell(object):
         f.write(''.join(['%.4f' % self.phi ,', ']))
         # NOTE: Enters permeability for all dimensions since the formation is isotropic
         # in the planar directions and the z permeability is not used in VESA.
-        f.write(''.join(['%.0f' % self.k, ', ' ,'%.0f' % self.k, ', ',\
-                '%.0f' % self.k, ', ']))
+        xperm = self.k
+        yperm = self.k 
+        zperm = self.k
+        f.write(''.join(['%.0f' % xperm, ', ' ,'%.0f' % yperm, ', ',\
+                '%.0f' % zperm, ', ']))
         f.write(''.join(['%.4f'  % self.bottom_b, ', ']))
         f.write(''.join(['%.4f' % self.top_b, ', ']))
         # initial CO2 saturation
