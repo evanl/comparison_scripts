@@ -19,8 +19,8 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     ratio = 1.
     layer_id = 1
     l_type = 1
-    #massinflow = [0.0198, 0.0405, 0.0437, 0.0540, 0.0740, 0.1030, \
-                  #0.1390, 0.1830, 0.2370, 0.2960, 0.370]
+    massinflow = [0.0198, 0.0405, 0.0437, 0.0540, 0.0740, 0.1030, \
+                  0.1390, 0.1830, 0.2370, 0.2960, 0.370]
     massinflow = [0.1418]
     if uniform == True:
         massinflow = [0.031536]
@@ -39,13 +39,13 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
     # 37
     # 42
     # density of C02 [kg/m^3]
-    co2_rho = 706.
-    #co2_rho = 465.
+    #co2_rho = 706.
+    co2_rho = 465.
     #co2_rho = 308.
 
     #viscosity of CO2 [Pa s]
-    co2_mu = 5.767e-5
-    #co2_mu = 3.35e-5
+    #co2_mu = 5.767e-5
+    co2_mu = 3.35e-5
     #co2_mu = 2.41e-5
     
     #density of brine [kg/m^3]
@@ -96,8 +96,8 @@ def vesa_make_input(layer_id, uniform = False, hydro = False,\
                 homogeneous = homogeneous, permval = 2000., poroval = 0.35)
         unit.fill_nonuniform_grid(e_cells)
         unit.plot_perm_data(e_cells)
-        xwell = xlocs[0]
-        ywell = ylocs[0]
+        xwell = xlocs[8]
+        ywell = ylocs[8]
 
     wf.write_system( timestep_days, output_days, simtime_years, \
             output_control, layers)
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         print "$ python vesa_make_input.py <layer_id/simtitle>"
     layer_id = sys.argv[1]
     timestep_days = 0.25
-    uniform = True
+    uniform = False
     hydro = False
     homogeneous = True
     if uniform == True:

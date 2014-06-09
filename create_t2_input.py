@@ -239,11 +239,11 @@ if __name__ == '__main__':
     # using density estimates. If a directory is specified, the 
     # initial pressures and dissolved fractions will be taken from
     # the 'hd' + '_dir/'
-    hydro = False
-    uniform = True
+    hydro = True
+    uniform = False
     two_d = False
-    sleipner = False
-    shale = True
+    sleipner = True
+    shale = False
     linear_rp = False
     no_cap = False
     type1_source = False
@@ -253,9 +253,9 @@ if __name__ == '__main__':
         hd = False
         bc_type = 2
     else:
-        hd = 'u25_hydro'
+        #hd = 'u25_hydro'
         #hd = 'u25_hydro_no_dissolution'
-        #hd = 'sl_noshale_hydro'
+        hd = 'sl_noshale_hydro'
         if two_d == True:
             #hd = 'sl_twod_hydro'
             hd = 'sl_twod_hydro_32'

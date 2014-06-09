@@ -1389,10 +1389,11 @@ class T2InputGrid(object):
             CB = plt.colorbar(CS, shrink = 0.8, extend = 'both')
             title = 'contour_cells'
         else:
-            fig = plt.figure(figsize=(8.,4.5), dpi = 360, facecolor = 'w',\
+            fig = plt.figure(figsize=(11.,8.5), dpi = 960, facecolor = 'w',\
                 edgecolor ='k')
             ax = fig.add_subplot(111, projection = '3d')
-            p1 = ax.scatter(xs,ys,zs, s=20)
+            p1 = ax.scatter(xs,ys,zs, s=10, facecolor = (.7,.7,.7), c=zs)
+            plt.gray()
             ax.set_zlabel('Z')
             title = 'scatter_cells'
 
@@ -1400,7 +1401,7 @@ class T2InputGrid(object):
         ax.set_ylabel('Y')
         if show == True:
             plt.show()
-        plt.savefig(title, fmt = '.pdf')
+        plt.savefig(title + '.pdf', format = 'pdf')
         plt.clf()
         plt.close()
         print "scatter plot complete"

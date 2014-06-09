@@ -83,6 +83,7 @@ class Compare:
         """ takes in numpy arrays of same shape
         """
         ax_c = self.fig.add_subplot(position)
+        plt.tick_params(which='major', length=3, color = 'w')
         if label == 'saturation []':
             n_levels = 8
             v = np.linspace(0., 0.8, num = n_levels)
@@ -92,6 +93,7 @@ class Compare:
         if contour_label == True:
             self.fig.subplots_adjust(right=0.84)
             cb_axes = self.fig.add_axes([0.85, 0.15, 0.05, 0.7])
+            plt.tick_params(which='major', length=3, color = 'k')
             self.fig.colorbar(CS, cax = cb_axes, format = '%.2f')
             #CB = plt.colorbar(CS, shrink = 1.0, pad=0.02, fraction = 0.07,\
                     #extend = 'both', format='%.2f')
@@ -100,9 +102,10 @@ class Compare:
         if section == True:
             ax_c.xaxis.set_ticks(np.arange(0,6000,2500))
         else:
+            ax_c.xaxis.set_ticks(np.arange(0,3500,1000))
             ax_c.set_xticklabels([])
 
-        #ax_c.set_ylabel(ylab)
+
         #ax_c.set_xlabel(xlab)
         #ax_c.set_aspect('equal')
         ax_c.set_title(title)
@@ -350,9 +353,9 @@ if __name__ == '__main__':
     section = False
     parallelt2 = True
     double_balance = True
-    split = 8
+    split = 0
     fmt = 'pdf'
-    t2_read = False
+    t2_read = True
     vesa_read = True
     c = Compare( sim_titles, num_vesa_sims, sleipner, section, \
             parallel = parallelt2, split = split,\
@@ -360,19 +363,22 @@ if __name__ == '__main__':
             vesa_read = vesa_read)
 
     #TOUGH2
-    #toughid = '32_kpa7cap_topsat'
-    #sec_type = 'tough'
-    #title ='t' + toughid + '_' + sec_type + '_section' 
-    #c.create_cross_section_comparison(title, sec_type = sec_type,\
-            #time_indices = [1, 4, 7], fmt = fmt)
-    #tpl = 't' + toughid + '_tough_plume'
-    #c.create_tough_plume_match(tpl, fmt, thickness = False)
+    if t2_read == True:
+        toughid = '42_nocap'
+        sec_type = 'tough'
+        title ='t' + toughid + '_' + sec_type + '_section' 
+        c.create_cross_section_comparison(title, sec_type = sec_type,\
+                time_indices = [1, 4, 7], fmt = fmt)
+        tpl = 't' + toughid + '_tough_plume'
+        c.create_tough_plume_match(tpl, fmt, thickness = True)
 
     #VESA
-    vesa_id = '32_varinj_phi27'
-    sec_type = 'vesa'
-    title ='v' + vesa_id + '_' + sec_type + '_section' 
-    c.create_cross_section_comparison(title, sec_type = sec_type,\
-            time_indices = [1, 4, 7], fmt = fmt)
-    vpl = 'v' + vesa_id + '_vesa_plume_sharp'
-    c.create_vesa_plume_match(vpl, fmt)
+    if vesa_read == True:
+        vesa_id = '42'
+        sec_type = 'vesa'
+        title ='v' + vesa_id + '_' + sec_type + '_section' 
+        c.create_cross_section_comparison(title, sec_type = sec_type,\
+                time_indices = [1, 4, 7], fmt = fmt)
+        vpl = 'v' + vesa_id + '_vesa_plume_sharp'
+        c.create_vesa_plume_match(vpl, fmt)
+

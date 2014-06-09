@@ -36,9 +36,9 @@ if __name__ == '__main__':
     cells, time_steps = vr.read_output_data(layer = layer)
     t_read = clock()
 
-    uniform = True
-    sleipner = False
-    yearwise = False
+    uniform = False
+    sleipner = True
+    yearwise = True
     if uniform == True:
         nx = 25
         ny = 25

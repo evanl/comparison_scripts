@@ -25,7 +25,7 @@ def process_t2_output(sim_title, parallel = False, split = 0,\
             #num_outputs +=1
     #print "The number of timesteps output: " + str(num_outputs)
     #f.close()
-    num_outputs = 24
+    num_outputs = 11
 
     # read the file[s] for the timestep data
     if parallel == True:
